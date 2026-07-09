@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:solana_idl_codegen/solana_idl_codegen.dart';
+import 'package:solana_idl_codegen/src/generator/generator_version.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -144,7 +145,7 @@ void main() {
       );
       final dart = output.files['program.dart']!;
       expect(dart, contains('class LegacyCounterAddress'));
-      expect(dart, contains('generator-version: 0.1.0'));
+      expect(dart, contains('generator-version: $solanaIdlGeneratorVersion'));
       expect(dart, isNot(contains('package:solana')));
       expect(dart, isNot(contains('package:solana_idl_codegen')));
       expect(dart, isNot(contains(RegExp(r'\bdynamic\b'))));
