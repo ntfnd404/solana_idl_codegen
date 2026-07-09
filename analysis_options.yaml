@@ -1,0 +1,17 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.solana.dart"
+    - "test/.generated/**"
+
+linter:
+  rules:
+    always_declare_return_types: true
+    avoid_dynamic_calls: true
+    avoid_relative_lib_imports: true
+    directives_ordering: true
+    prefer_final_locals: true
+    prefer_relative_imports: true
+    public_member_api_docs: true

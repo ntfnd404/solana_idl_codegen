@@ -1,0 +1,21 @@
+# https://dart.dev/tools/private-files
+# Created by `dart pub`
+.dart_tool/
+doc/api/
+build/
+coverage/
+*.solana.dart
+*.solana.*.dart
+**/doc/api/
+
+# Avoid committing pubspec.lock for library packages; see
+# https://dart.dev/tools/pub/private-files#pubspec-lock.
+/pubspec.lock
+.idea/
+*.iml
+
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+.vscode/

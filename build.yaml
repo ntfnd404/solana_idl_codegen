@@ -1,0 +1,38 @@
+builders:
+  bundled:
+    import: "package:solana_idl_codegen/builder.dart"
+    builder_factories: ["solanaIdlBundledBuilder"]
+    build_extensions:
+      "lib/idl/{{}}.json":
+        - "lib/generated/{{}}.solana.dart"
+    auto_apply: none
+    build_to: source
+    defaults:
+      generate_for:
+        - "lib/idl/**.json"
+      options:
+        type_prefix: "auto"
+        type_suffix: ""
+
+  modular:
+    import: "package:solana_idl_codegen/builder.dart"
+    builder_factories: ["solanaIdlModularBuilder"]
+    build_extensions:
+      "lib/idl/{{}}.json":
+        - "lib/generated/{{}}.solana.dart"
+        - "lib/generated/{{}}.solana.support.dart"
+        - "lib/generated/{{}}.solana.types.dart"
+        - "lib/generated/{{}}.solana.accounts.dart"
+        - "lib/generated/{{}}.solana.instructions.dart"
+        - "lib/generated/{{}}.solana.resolution.dart"
+        - "lib/generated/{{}}.solana.events.dart"
+        - "lib/generated/{{}}.solana.errors.dart"
+        - "lib/generated/{{}}.solana.client.dart"
+    auto_apply: none
+    build_to: source
+    defaults:
+      generate_for:
+        - "lib/idl/**.json"
+      options:
+        type_prefix: "auto"
+        type_suffix: ""

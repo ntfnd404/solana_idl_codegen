@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+
+jobs:
+  dart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: dart analyze
+      - run: dart test
+      - run: dart doc --dry-run .
+      - run: dart pub publish --dry-run
+
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: >-
+          dart run ../bin/solana_idl_codegen.dart generate
+          lib/idl/example_program.json
+          lib/idl/secondary_program.json
+          --input-root lib/idl
+          --output lib/generated
+          --layout modular
+          --check
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build web
+
+  native-example:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: macos
+          - os: windows-latest
+            target: windows
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: example
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - if: matrix.target == 'linux'
+        run: >-
+          sudo apt-get update &&
+          sudo apt-get install -y
+          clang
+          cmake
+          ninja-build
+          pkg-config
+          libgtk-3-dev
+          liblzma-dev
+      - run: flutter pub get
+      - run: flutter build ${{ matrix.target }}
+
+  reference-provenance:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart run tool/reference_vectors/verify_upstream.dart

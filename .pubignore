@@ -1,0 +1,17 @@
+.dart_tool/
+**/.dart_tool/
+build/
+**/build/
+**/Flutter/ephemeral/
+.flutter-plugins
+.flutter-plugins-dependencies
+.git/
+.github/
+.idea/
+.vscode/
+doc/api/
+BACKLOG.md
+test/
+tool/reference_vectors/
+.solana_idl_codegen*
+*.iml
