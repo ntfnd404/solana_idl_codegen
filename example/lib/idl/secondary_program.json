@@ -1,0 +1,27 @@
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {
+    "name": "secondary_program",
+    "version": "1.0.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "consume",
+      "discriminator": [99, 1, 2, 3],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "payload",
+          "type": "bytes"
+        }
+      ]
+    }
+  ],
+  "types": []
+}

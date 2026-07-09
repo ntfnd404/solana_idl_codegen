@@ -1,0 +1,25 @@
+name: solana_idl_example
+description: Neutral Flutter demonstration of generated transport adapters.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  solana: ^0.32.0+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  lints: ^6.0.0
+  build_runner: ^2.12.2
+  solana_idl_codegen:
+    path: ..
+
+flutter:
+  uses-material-design: true

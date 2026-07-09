@@ -1,0 +1,135 @@
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {
+    "name": "example_program",
+    "version": "1.0.0",
+    "spec": "0.1.0",
+    "description": "Neutral fixture owned by the generator repository"
+  },
+  "instructions": [
+    {
+      "name": "create_message",
+      "docs": ["Creates a message account and returns its numeric identifier."],
+      "discriminator": [34, 211, 52, 19, 81, 9, 201, 7],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "state",
+          "accounts": [
+            {
+              "name": "message",
+              "writable": true,
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [109, 101, 115, 115, 97, 103, 101]
+                  },
+                  {
+                    "kind": "arg",
+                    "path": "id"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "optional_referrer",
+          "optional": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "u64"
+        },
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "returns": "u64"
+    },
+    {
+      "name": "read_message",
+      "discriminator": [35, 212, 53, 20, 82, 10, 202, 8],
+      "accounts": [
+        {
+          "name": "message"
+        }
+      ],
+      "args": [],
+      "returns": {
+        "defined": {
+          "name": "Message"
+        }
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Message",
+      "discriminator": [77, 101, 115, 115, 97, 103, 101, 1]
+    }
+  ],
+  "events": [
+    {
+      "name": "MessageCreated",
+      "discriminator": [77, 101, 115, 115, 97, 103, 101, 2]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "EmptyMessage",
+      "msg": "Message text cannot be empty"
+    }
+  ],
+  "types": [
+    {
+      "name": "Message",
+      "docs": ["Persistent message state."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "text",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MessageCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "message",
+            "type": "pubkey"
+          },
+          {
+            "name": "id",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

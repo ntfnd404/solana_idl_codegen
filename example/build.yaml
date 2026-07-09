@@ -1,0 +1,12 @@
+targets:
+  $default:
+    builders:
+      solana_idl_codegen:bundled:
+        enabled: false
+      solana_idl_codegen:modular:
+        enabled: true
+        generate_for:
+          - lib/idl/**.json
+        options:
+          type_prefix: auto
+          type_suffix: ""
