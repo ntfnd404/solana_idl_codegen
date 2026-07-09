@@ -1,0 +1,34 @@
+{
+  "version": "0.0.0",
+  "name": "legacy_reference_vectors",
+  "metadata": {
+    "address": "11111111111111111111111111111111"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [],
+      "args": [
+        {
+          "name": "arg",
+          "type": {
+            "defined": {
+              "name": "AliasTest"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "AliasTest",
+      "type": {
+        "kind": "type",
+        "alias": {
+          "array": ["u8", 3]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {
+    "name": "reference_types",
+    "version": "0.0.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [],
+  "types": [
+    {
+      "name": "MintInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "minted", "type": "bool"},
+          {"name": "metadataUrl", "type": "string"}
+        ]
+      }
+    },
+    {
+      "name": "IntegerTest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "unsigned", "type": "u256"},
+          {"name": "signed", "type": "i256"}
+        ]
+      }
+    }
+  ]
+}

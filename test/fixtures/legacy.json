@@ -1,0 +1,40 @@
+{
+  "version": "0.1.0",
+  "name": "legacy_counter",
+  "metadata": {
+    "address": "11111111111111111111111111111111"
+  },
+  "instructions": [
+    {
+      "name": "set_value",
+      "accounts": [
+        {"name": "counter", "isMut": true, "isSigner": false},
+        {"name": "authority", "isMut": false, "isSigner": true}
+      ],
+      "args": [
+        {"name": "value", "type": "u64"}
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Counter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "authority", "type": "publicKey"},
+          {"name": "value", "type": "u64"}
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "ValueChanged",
+      "fields": [
+        {"name": "value", "type": "u64", "index": false}
+      ]
+    }
+  ],
+  "errors": []
+}

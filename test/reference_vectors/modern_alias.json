@@ -1,0 +1,36 @@
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {
+    "name": "reference_vectors",
+    "version": "0.0.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "discriminator": [0, 1, 2, 3, 4, 5, 6, 7],
+      "accounts": [],
+      "args": [
+        {
+          "name": "arg",
+          "type": {
+            "defined": {
+              "name": "AliasTest"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "AliasTest",
+      "type": {
+        "kind": "type",
+        "alias": {
+          "array": ["u8", 3]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {
+    "name": "type_matrix",
+    "version": "1.0.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "exercise",
+      "discriminator": [1, 2, 3, 4, 5, 6, 7, 8],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "nested",
+          "accounts": [
+            {
+              "name": "state",
+              "writable": true,
+              "pda": {
+                "seeds": [
+                  {"kind": "const", "value": [115, 116, 97, 116, 101]},
+                  {"kind": "arg", "path": "value"}
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "args": [
+        {"name": "value", "type": "u64"},
+        {"name": "payload", "type": {"defined": {"name": "Everything"}}}
+      ],
+      "returns": {"option": "u128"}
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Everything",
+      "discriminator": [8, 7, 6, 5, 4, 3, 2, 1]
+    }
+  ],
+  "events": [
+    {
+      "name": "ComplexEvent",
+      "discriminator": [9, 8, 7, 6, 5, 4, 3, 2]
+    }
+  ],
+  "errors": [
+    {"code": 6000, "name": "BadValue", "msg": "Bad value"}
+  ],
+  "types": [
+    {
+      "name": "Everything",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "flag", "type": "bool"},
+          {"name": "small", "type": "i32"},
+          {"name": "large", "type": "i256"},
+          {"name": "ratio", "type": "f64"},
+          {"name": "name", "type": "string"},
+          {"name": "data", "type": "bytes"},
+          {"name": "owner", "type": "pubkey"},
+          {"name": "optional", "type": {"option": "u64"}},
+          {"name": "items", "type": {"vec": "u16"}},
+          {"name": "fixed", "type": {"array": ["u8", 4]}},
+          {"name": "choice", "type": {"defined": {"name": "Choice"}}}
+        ]
+      }
+    },
+    {
+      "name": "Choice",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {"name": "Empty"},
+          {"name": "Tuple", "fields": ["u8", "string"]},
+          {
+            "name": "Named",
+            "fields": [
+              {"name": "amount", "type": "u128"}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ComplexEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "choice", "type": {"defined": {"name": "Choice"}}}
+        ]
+      }
+    }
+  ]
+}

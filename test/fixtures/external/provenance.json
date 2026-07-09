@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "fixtures": [
+    {
+      "id": "drift-protocol-v2",
+      "file": "drift.json",
+      "mode": "generation-only-with-test-address",
+      "sourceUrl": "https://github.com/drift-labs/protocol-v2/blob/13e8e9b8d614f3b62e3a65a8c372c819e6529aeb/sdk/src/idl/drift.json",
+      "rawSourceUrl": "https://raw.githubusercontent.com/drift-labs/protocol-v2/13e8e9b8d614f3b62e3a65a8c372c819e6529aeb/sdk/src/idl/drift.json",
+      "commit": "13e8e9b8d614f3b62e3a65a8c372c819e6529aeb",
+      "producer": "Drift protocol-v2 SDK",
+      "licenseNote": "Apache-2.0 repository license.",
+      "sourceSha256": "79b423239fc268c03c60cd1d5e3fb50766b9d1f685744df3ca94d63b30519490",
+      "purpose": "Large real-world legacy Anchor IDL with many accounts, instructions, errors, tuple enum payloads, and repeated padding fields.",
+      "testAddress": "11111111111111111111111111111111"
+    },
+    {
+      "id": "openbook-v2",
+      "file": "openbook_v2.json",
+      "mode": "generation-only-with-test-address",
+      "sourceUrl": "https://github.com/openbook-dex/openbook-v2/blob/f3e17421e675b083b584867594bf3cf4f675d156/idl/openbook_v2.json",
+      "rawSourceUrl": "https://raw.githubusercontent.com/openbook-dex/openbook-v2/f3e17421e675b083b584867594bf3cf4f675d156/idl/openbook_v2.json",
+      "commit": "f3e17421e675b083b584867594bf3cf4f675d156",
+      "producer": "OpenBook V2",
+      "licenseNote": "Repository LICENSE states files outside programs/openbook-v2/src/instructions and 3rdparty are MIT licensed.",
+      "sourceSha256": "a7da6ea7433682b61b23a08a66d63665b0d0631434eeabe335ea32b3c111ee80",
+      "purpose": "Real-world legacy Anchor IDL with nested accounts, PDA metadata, empty custom error messages, and naming-collision pressure.",
+      "testAddress": "11111111111111111111111111111111"
+    },
+    {
+      "id": "mango-v4",
+      "file": "mango_v4.json",
+      "mode": "skipped-generation-candidate",
+      "sourceUrl": "https://github.com/blockworks-foundation/mango-v4/blob/549b5c6fcea85d261a2298dd45190f223ab969b0/mango_v4.json",
+      "rawSourceUrl": "https://raw.githubusercontent.com/blockworks-foundation/mango-v4/549b5c6fcea85d261a2298dd45190f223ab969b0/mango_v4.json",
+      "commit": "549b5c6fcea85d261a2298dd45190f223ab969b0",
+      "producer": "Mango V4",
+      "licenseNote": "Repository LICENSE states files outside programs/mango-v4/src/instructions and 3rdparty are MIT licensed.",
+      "sourceSha256": "7d445a3123ad8172b555df6862f8fab87cb2df0f768f0e0a663c9d8d8c0d8587",
+      "purpose": "Real-world legacy Anchor IDL with relations, PDA seeds, many declarations, and legacy snake-case PDA arg paths.",
+      "skipReason": "Current generator requires account-data PDA seeds to declare an account type or external seed type policy.",
+      "expectedDiagnostic": "IDL_PDA_ACCOUNT_DATA_TYPE",
+      "testAddress": "11111111111111111111111111111111"
+    }
+  ],
+  "skippedCandidates": [
+    {
+      "id": "switchboard",
+      "sourceUrl": "https://github.com/switchboard-xyz/solana-sdk",
+      "licenseNote": "No committed Anchor IDL JSON was found in the inspected repository tree.",
+      "purpose": "Candidate for oracle-heavy real-world IDL coverage.",
+      "skipReason": "No stable IDL JSON source was available from the inspected public repository without introducing external tooling."
+    }
+  ]
+}
