@@ -1,4 +1,5 @@
 import '../../idl.dart';
+import '../../idl_path_matcher.dart';
 import '../account_leaf.dart';
 import 'pda_seed_literals.dart';
 
@@ -24,8 +25,13 @@ final class PdaProgramExpressionEmitter {
         '${literals.type('address')}.fromBytes(${literals.bytes(value)})',
       IdlPathSeed(kind: 'arg', :final path) =>
         'args.${path.split('.').map(literals.member).join('.')}',
-      IdlPathSeed(kind: 'account', :final path) =>
-        '${literals.member(leaves.firstWhere((item) => item.wirePath == path).path)}!',
+      IdlPathSeed(kind: 'account', :final path) => literals.member(
+        leaves
+            .firstWhere(
+              (item) => IdlPathMatcher.pathsMatch(item.wirePath, path),
+            )
+            .path,
+      ),
       _ => '${literals.type('program')}.programAddress',
     };
   }

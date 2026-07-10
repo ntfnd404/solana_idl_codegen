@@ -38,8 +38,8 @@
       "licenseNote": "Repository LICENSE states files outside programs/mango-v4/src/instructions and 3rdparty are MIT licensed.",
       "sourceSha256": "7d445a3123ad8172b555df6862f8fab87cb2df0f768f0e0a663c9d8d8c0d8587",
       "purpose": "Real-world legacy Anchor IDL with relations, PDA seeds, many declarations, and legacy snake-case PDA arg paths.",
-      "skipReason": "Current generator requires account-data PDA seeds to declare an account type or external seed type policy.",
-      "expectedDiagnostic": "IDL_PDA_ACCOUNT_DATA_TYPE",
+      "skipReason": "Current generator requires relation targets to resolve to declared instruction accounts after normalized path matching.",
+      "expectedDiagnostic": "IDL_RELATION_TARGET",
       "testAddress": "11111111111111111111111111111111"
     }
   ],

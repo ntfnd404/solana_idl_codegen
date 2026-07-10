@@ -1,4 +1,5 @@
 import '../idl.dart';
+import '../idl_path_matcher.dart';
 
 /// Resolves nested IDL field paths through defined struct and alias types.
 final class TypePathResolver {
@@ -71,18 +72,12 @@ final class TypePathResolver {
     for (final field in fields) {
       if (field.name == segment) return field;
     }
-    final normalized = _canonicalSegment(segment);
+    final normalized = IdlPathMatcher.canonicalSegment(segment);
     for (final field in fields) {
-      if (_canonicalSegment(field.name) == normalized) return field;
+      if (IdlPathMatcher.canonicalSegment(field.name) == normalized) {
+        return field;
+      }
     }
     return null;
   }
-
-  String _canonicalSegment(String value) => value
-      .replaceAllMapped(
-        RegExp('([a-z0-9])([A-Z])'),
-        (match) => '${match[1]}_${match[2]}',
-      )
-      .replaceAll(RegExp('[^A-Za-z0-9]+'), '_')
-      .toLowerCase();
 }

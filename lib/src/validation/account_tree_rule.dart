@@ -1,4 +1,5 @@
 import '../idl.dart';
+import '../idl_path_matcher.dart';
 import 'validation_issue.dart';
 
 /// Result of validating and indexing a nested instruction-account tree.
@@ -35,7 +36,8 @@ final class AccountTreeValidationRule {
     final paths = <String>{};
     final leaves = <String>{};
     final leafItems = <String, IdlAccountItem>{};
-    _visit(accounts, '', paths, leaves, leafItems, issue);
+    final canonicalPaths = <String, String>{};
+    _visit(accounts, '', paths, leaves, leafItems, canonicalPaths, issue);
     return AccountTreeValidationResult(
       paths: paths,
       leaves: leaves,
@@ -49,6 +51,7 @@ final class AccountTreeValidationRule {
     Set<String> paths,
     Set<String> leaves,
     Map<String, IdlAccountItem> leafItems,
+    Map<String, String> canonicalPaths,
     ValidationIssue issue,
   ) {
     final siblings = <String>{};
@@ -68,9 +71,28 @@ final class AccountTreeValidationRule {
           node.sourcePath,
         );
       }
+      final canonicalPath = IdlPathMatcher.canonicalPath(path);
+      final existingPath = canonicalPaths[canonicalPath];
+      if (existingPath == null) {
+        canonicalPaths[canonicalPath] = path;
+      } else if (existingPath != path) {
+        issue(
+          'IDL_ACCOUNT_PATH_COLLISION',
+          'Nested account path "$path" canonically collides with "$existingPath".',
+          node.sourcePath,
+        );
+      }
       switch (node) {
         case IdlAccountGroup(:final accounts):
-          _visit(accounts, path, paths, leaves, leafItems, issue);
+          _visit(
+            accounts,
+            path,
+            paths,
+            leaves,
+            leafItems,
+            canonicalPaths,
+            issue,
+          );
         case IdlAccountItem():
           leaves.add(path);
           leafItems[path] = node;

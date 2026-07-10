@@ -1,5 +1,6 @@
 import '../account_dependency_graph.dart';
 import '../idl.dart';
+import '../idl_path_matcher.dart';
 import 'account_tree_rule.dart';
 import 'address_rule.dart';
 import 'pda_seed_rule.dart';
@@ -109,7 +110,7 @@ final class AccountValidationRule {
     Map<String, IdlAccountItem> leafItems,
     ValidationIssue issue,
   ) {
-    final graph = AccountDependencyGraph.fromInstruction(instruction);
+    final graph = AccountDependencyGraph.pdaValidation(instruction);
     for (final entry in leafItems.entries) {
       for (final seed in entry.value.seeds.whereType<IdlPathSeed>()) {
         if (seed.kind != 'account') continue;
@@ -123,7 +124,7 @@ final class AccountValidationRule {
             'PDA account path "${seed.path}" is undefined.',
             seed.sourcePath,
           );
-        } else if (seed.path != dependency) {
+        } else if (!IdlPathMatcher.pathsMatch(seed.path, dependency)) {
           _validateAccountDataSeed(
             seed,
             dependency,

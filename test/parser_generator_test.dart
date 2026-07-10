@@ -118,6 +118,84 @@ void main() {
       );
     });
 
+    test('allows relation PDA cycles breakable by account overrides', () {
+      final result = generator.validateString(_relationCycleSource);
+      expect(result.isValid, isTrue, reason: result.diagnostics.join('\n'));
+
+      final output = generator.generateString(
+        _relationCycleSource,
+        options: const GenerationOptions(),
+      );
+      expect(
+        output.files['program.dart'],
+        contains('class RelationCycleCloseUserRequest'),
+      );
+    });
+
+    test('rejects PDA dependency cycles', () {
+      final result = generator.validateString(r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "pda_cycle", "version": "1", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "run",
+    "discriminator": [1],
+    "accounts": [
+      {
+        "name": "first",
+        "pda": {"seeds": [{"kind": "account", "path": "second"}]}
+      },
+      {
+        "name": "second",
+        "pda": {"seeds": [{"kind": "account", "path": "first"}]}
+      }
+    ],
+    "args": []
+  }],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}
+''');
+      expect(result.isValid, isFalse);
+      expect(
+        result.diagnostics.any(
+          (item) => item.code == 'IDL_ACCOUNT_RESOLUTION_CYCLE',
+        ),
+        isTrue,
+      );
+    });
+
+    test('rejects canonical account path collisions', () {
+      final result = generator.validateString(r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "account_collision", "version": "1", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "run",
+    "discriminator": [1],
+    "accounts": [
+      {"name": "fooBar", "accounts": []},
+      {"name": "foo_bar", "accounts": []}
+    ],
+    "args": []
+  }],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}
+''');
+      expect(result.isValid, isFalse);
+      expect(
+        result.diagnostics.any(
+          (item) => item.code == 'IDL_ACCOUNT_PATH_COLLISION',
+        ),
+        isTrue,
+      );
+    });
+
     test('rejects unverified COption payload types', () {
       final result = generator.validateString('''
 {
@@ -406,6 +484,298 @@ Future<void> main() async {
     },
   );
 
+  test(
+    'relation PDA cycle resolver uses overrides and reports structured gaps',
+    () async {
+      final result = await _runGeneratedProgram(
+        generator,
+        _relationCycleSource,
+        r'''
+import 'generated.dart';
+
+Future<void> main() async {
+  final authority = RelationCycleAddress.fromBytes(List<int>.filled(32, 3));
+  final user = RelationCycleAddress.fromBytes(List<int>.filled(32, 7));
+  var deriveCalls = 0;
+  final deriver = RelationCyclePdaDeriverCallback((program, seeds) async {
+    deriveCalls++;
+    if (program != RelationCycleProgram.programAddress ||
+        seeds.length != 2 ||
+        String.fromCharCodes(seeds.first) != 'user' ||
+        seeds.last.length != 32) {
+      throw StateError('PDA derivation inputs were incorrect.');
+    }
+    return RelationCyclePdaResult(address: user, bump: 255);
+  });
+  final resolver = RelationCycleCloseUserAccountResolver(
+    RelationCycleResolutionContext(pdaDeriver: deriver),
+  );
+  final resolved = await resolver.resolve(
+    args: const RelationCycleCloseUserArgs(),
+    overrides: RelationCycleCloseUserAccountOverrides(
+      authority: RelationCycleAccountOverride.use(authority),
+    ),
+  );
+  if (resolved.authority != authority ||
+      resolved.user != user ||
+      deriveCalls != 1) {
+    throw StateError('Explicit override did not break the relation/PDA cycle.');
+  }
+
+  try {
+    await resolver.resolve(args: const RelationCycleCloseUserArgs());
+    throw StateError('Expected unresolved cycle to fail.');
+  } on RelationCycleAccountResolutionException catch (error) {
+    if (error.causes.length != 2 ||
+        error.causes.any((cause) => cause.code != 'RESOLUTION_UNRESOLVED')) {
+      throw StateError('Expected structured unresolved-account causes.');
+    }
+  } catch (error) {
+    if (error.toString().contains('Null check operator used on a null value')) {
+      throw StateError('Resolver leaked a null-check exception.');
+    }
+    rethrow;
+  }
+}
+''',
+      );
+      expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+    },
+  );
+
+  test('relation resolver can resolve after a later PDA pass', () async {
+    final result = await _runGeneratedProgram(
+      generator,
+      _chainedResolutionSource,
+      r'''
+import 'generated.dart';
+
+final class TestRelationResolver implements ChainResolutionRelationResolver {
+  TestRelationResolver(this.first);
+
+  final ChainResolutionAddress first;
+  var calls = 0;
+
+  @override
+  Future<ChainResolutionAddress?> resolveRelation({
+    required String accountPath,
+    required String relationPath,
+    required Map<String, ChainResolutionAddress> resolvedAccounts,
+  }) async {
+    calls++;
+    if (accountPath != 'first' || relationPath != 'second') {
+      throw StateError('Unexpected relation request.');
+    }
+    return resolvedAccounts.containsKey('second') ? first : null;
+  }
+}
+
+Future<void> main() async {
+  final first = ChainResolutionAddress.fromBytes(List<int>.filled(32, 5));
+  final second = ChainResolutionAddress.fromBytes(List<int>.filled(32, 6));
+  final relationResolver = TestRelationResolver(first);
+  final deriver = ChainResolutionPdaDeriverCallback((program, seeds) async {
+    if (seeds.length != 2 ||
+        String.fromCharCodes(seeds.first) != 'second' ||
+        seeds.last.length != 32) {
+      throw StateError('PDA derivation inputs were incorrect.');
+    }
+    return ChainResolutionPdaResult(address: second, bump: 255);
+  });
+  final resolver = ChainResolutionResolveFirstAccountResolver(
+    ChainResolutionResolutionContext(
+      relationResolver: relationResolver,
+      pdaDeriver: deriver,
+    ),
+  );
+  final resolved = await resolver.resolve(
+    args: const ChainResolutionResolveFirstArgs(),
+  );
+  if (resolved.first != first ||
+      resolved.second != second ||
+      resolved.third != ChainResolutionProgram.programAddress ||
+      relationResolver.calls < 2) {
+    throw StateError('Expected relation resolution to require a second pass.');
+  }
+}
+''',
+    );
+    expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+  });
+
+  test(
+    'optional relation PDA account can resolve after required accounts',
+    () async {
+      final result = await _runGeneratedProgram(
+        generator,
+        _optionalResolutionSource,
+        r'''
+import 'generated.dart';
+
+final class TestRelationResolver implements OptionalResolutionRelationResolver {
+  TestRelationResolver(this.first);
+
+  final OptionalResolutionAddress first;
+  var calls = 0;
+
+  @override
+  Future<OptionalResolutionAddress?> resolveRelation({
+    required String accountPath,
+    required String relationPath,
+    required Map<String, OptionalResolutionAddress> resolvedAccounts,
+  }) async {
+    calls++;
+    if (accountPath != 'first' || relationPath != 'second') {
+      throw StateError('Unexpected relation request.');
+    }
+    return resolvedAccounts.containsKey('second') ? first : null;
+  }
+}
+
+Future<void> main() async {
+  final first = OptionalResolutionAddress.fromBytes(List<int>.filled(32, 4));
+  final second = OptionalResolutionAddress.fromBytes(List<int>.filled(32, 8));
+  final relationResolver = TestRelationResolver(first);
+  final deriver = OptionalResolutionPdaDeriverCallback((program, seeds) async {
+    if (seeds.length != 2 ||
+        String.fromCharCodes(seeds.first) != 'second' ||
+        seeds.last.length != 32) {
+      throw StateError('PDA derivation inputs were incorrect.');
+    }
+    return OptionalResolutionPdaResult(address: second, bump: 255);
+  });
+  final resolver = OptionalResolutionResolveOptionalAccountResolver(
+    OptionalResolutionResolutionContext(
+      relationResolver: relationResolver,
+      pdaDeriver: deriver,
+    ),
+  );
+  final resolved = await resolver.resolve(
+    args: const OptionalResolutionResolveOptionalArgs(),
+  );
+  if (resolved.first != first ||
+      resolved.second != second ||
+      resolved.third != OptionalResolutionProgram.programAddress ||
+      relationResolver.calls < 2) {
+    throw StateError('Expected optional accounts to keep resolving after required accounts.');
+  }
+}
+''',
+      );
+      expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+    },
+  );
+
+  test('optional absent relation PDA account remains suppressed', () async {
+    final result = await _runGeneratedProgram(
+      generator,
+      _optionalResolutionSource,
+      r'''
+import 'generated.dart';
+
+Future<void> main() async {
+  final deriver = OptionalResolutionPdaDeriverCallback((program, seeds) async {
+    throw StateError('Suppressed optional account should not derive a PDA.');
+  });
+  final resolver = OptionalResolutionResolveOptionalAccountResolver(
+    OptionalResolutionResolutionContext(pdaDeriver: deriver),
+  );
+  final request = await resolver.prepare(
+    args: const OptionalResolutionResolveOptionalArgs(),
+    overrides: const OptionalResolutionResolveOptionalAccountOverrides(
+      second: OptionalResolutionAccountOverride.absent(),
+    ),
+  );
+  if (request.accounts.first != null || request.accounts.second != null) {
+    throw StateError('Absent optional account was resolved unexpectedly.');
+  }
+  final instruction = request.instruction();
+  if (instruction.accounts[0].address != OptionalResolutionProgram.programAddress ||
+      instruction.accounts[1].address != OptionalResolutionProgram.programAddress ||
+      instruction.accounts[0].isSigner ||
+      instruction.accounts[1].isWritable) {
+    throw StateError('Optional absent sentinel semantics changed.');
+  }
+}
+''',
+    );
+    expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+  });
+
+  test('identity allowlist can break a relation PDA cycle', () async {
+    final result = await _runGeneratedProgram(
+      generator,
+      _relationCycleSource,
+      r'''
+import 'generated.dart';
+
+Future<void> main() async {
+  final authority = RelationCycleAddress.fromBytes(List<int>.filled(32, 9));
+  final user = RelationCycleAddress.fromBytes(List<int>.filled(32, 10));
+  final deriver = RelationCyclePdaDeriverCallback((program, seeds) async {
+    if (seeds.length != 2 ||
+        String.fromCharCodes(seeds.first) != 'user' ||
+        seeds.last.length != 32) {
+      throw StateError('PDA derivation inputs were incorrect.');
+    }
+    return RelationCyclePdaResult(address: user, bump: 255);
+  });
+  final resolver = RelationCycleCloseUserAccountResolver(
+    RelationCycleResolutionContext(
+      identity: authority,
+      identityAccountPaths: const {'authority'},
+      pdaDeriver: deriver,
+    ),
+  );
+  final resolved = await resolver.resolve(args: const RelationCycleCloseUserArgs());
+  if (resolved.authority != authority || resolved.user != user) {
+    throw StateError('Identity did not break the relation/PDA cycle.');
+  }
+}
+''',
+    );
+    expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+  });
+
+  test('required absent account is a structured terminal failure', () async {
+    final result = await _runGeneratedProgram(
+      generator,
+      _relationCycleSource,
+      r'''
+import 'generated.dart';
+
+Future<void> main() async {
+  final resolver = RelationCycleCloseUserAccountResolver(
+    RelationCycleResolutionContext(),
+  );
+  try {
+    await resolver.resolve(
+      args: const RelationCycleCloseUserArgs(),
+      overrides: const RelationCycleCloseUserAccountOverrides(
+        authority: RelationCycleAccountOverride.absent(),
+      ),
+    );
+    throw StateError('Expected required absent account to fail.');
+  } on RelationCycleAccountResolutionException catch (error) {
+    final absent = error.causes.where(
+      (cause) =>
+          cause.path == 'authority' &&
+          cause.code == 'RESOLUTION_REQUIRED_ABSENT',
+    );
+    final authorityUnresolved = error.causes.where(
+      (cause) =>
+          cause.path == 'authority' && cause.code == 'RESOLUTION_UNRESOLVED',
+    );
+    if (absent.length != 1 || authorityUnresolved.isNotEmpty) {
+      throw StateError('Required absent did not produce the expected structured failure.');
+    }
+  }
+}
+''',
+    );
+    expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+  });
+
   test('custom errors may contain an empty Anchor msg', () {
     final result = generator.validateString(r'''
 {
@@ -579,6 +949,226 @@ Future<void> main() async {
 ''', options: const GenerationOptions());
     expect(output.files['program.dart'], contains('args.groupNum'));
   });
+
+  test('PDA program account path resolves by wire-normalized names', () {
+    final output = generator.generateString(r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "pda_program_path", "version": "1", "spec": "0.1.0"},
+  "instructions": [
+    {
+      "name": "createGroup",
+      "discriminator": [1],
+      "accounts": [
+        {
+          "name": "group",
+          "pda": {
+            "seeds": [
+              {"kind": "const", "value": [103, 114, 111, 117, 112]}
+            ],
+            "program": {"kind": "account", "path": "group_program"}
+          }
+        },
+        {
+          "name": "groupProgram"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}
+''', options: const GenerationOptions());
+    expect(
+      output.files['program.dart'],
+      contains('programAddress: groupProgram'),
+    );
+  });
+
+  test('PDA account seed path resolves by wire-normalized names', () async {
+    const source = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "pda_account_path", "version": "1", "spec": "0.1.0"},
+  "instructions": [
+    {
+      "name": "createGroup",
+      "discriminator": [1],
+      "accounts": [
+        {
+          "name": "group",
+          "pda": {
+            "seeds": [
+              {"kind": "account", "path": "group_program"}
+            ]
+          }
+        },
+        {
+          "name": "groupProgram"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}
+''';
+    final output = generator.generateString(
+      source,
+      options: const GenerationOptions(),
+    );
+    final dart = output.files['program.dart']!;
+    expect(dart, contains('seeds.add(groupProgram.bytes);'));
+    expect(dart, isNot(contains('seedAccountCache')));
+    final directory = await Directory.systemTemp.createTemp(
+      'solana_idl_normalized_seed_',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    await File('${directory.path}/generated.dart').writeAsString(dart);
+    final result = await Process.run(
+      Platform.resolvedExecutable,
+      ['analyze', directory.path],
+      environment: {'HOME': directory.path, 'DART_DISABLE_ANALYTICS': '1'},
+    );
+    expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+  });
+}
+
+const _relationCycleSource = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "relation_cycle", "version": "1", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "close_user",
+    "discriminator": [86, 219, 138, 140, 236, 24, 118, 200],
+    "accounts": [
+      {
+        "name": "authority",
+        "writable": true,
+        "signer": true,
+        "relations": ["user"]
+      },
+      {
+        "name": "user",
+        "writable": true,
+        "pda": {
+          "seeds": [
+            {"kind": "const", "value": [117, 115, 101, 114]},
+            {"kind": "account", "path": "authority"}
+          ]
+        }
+      }
+    ],
+    "args": []
+  }],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}
+''';
+
+const _chainedResolutionSource = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "chain_resolution", "version": "1", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "resolve_first",
+    "discriminator": [7],
+    "accounts": [
+      {
+        "name": "first",
+        "relations": ["second"]
+      },
+      {
+        "name": "second",
+        "pda": {
+          "seeds": [
+            {"kind": "const", "value": [115, 101, 99, 111, 110, 100]},
+            {"kind": "account", "path": "third"}
+          ]
+        }
+      },
+      {
+        "name": "third",
+        "address": "11111111111111111111111111111111"
+      }
+    ],
+    "args": []
+  }],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}
+''';
+
+const _optionalResolutionSource = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "optional_resolution", "version": "1", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "resolve_optional",
+    "discriminator": [8],
+    "accounts": [
+      {
+        "name": "first",
+        "optional": true,
+        "relations": ["second"]
+      },
+      {
+        "name": "second",
+        "optional": true,
+        "pda": {
+          "seeds": [
+            {"kind": "const", "value": [115, 101, 99, 111, 110, 100]},
+            {"kind": "account", "path": "third"}
+          ]
+        }
+      },
+      {
+        "name": "third",
+        "address": "11111111111111111111111111111111"
+      }
+    ],
+    "args": []
+  }],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}
+''';
+
+Future<ProcessResult> _runGeneratedProgram(
+  SolanaIdlGenerator generator,
+  String idl,
+  String mainSource,
+) async {
+  final directory = await Directory.systemTemp.createTemp(
+    'solana_idl_generated_runtime_',
+  );
+  addTearDown(() => directory.delete(recursive: true));
+  final output = generator.generateString(
+    idl,
+    options: const GenerationOptions(),
+  );
+  await File(
+    '${directory.path}/generated.dart',
+  ).writeAsString(output.files['program.dart']!);
+  await File('${directory.path}/main.dart').writeAsString(mainSource);
+  return Process.run(
+    Platform.resolvedExecutable,
+    ['run', '${directory.path}/main.dart'],
+    workingDirectory: Directory.current.path,
+    environment: {'HOME': directory.path, 'DART_DISABLE_ANALYTICS': '1'},
+  );
 }
 
 Set<String> _publicDeclarationNames(Iterable<String> sources) {

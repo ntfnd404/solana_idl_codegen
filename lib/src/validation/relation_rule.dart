@@ -1,4 +1,5 @@
 import '../idl.dart';
+import '../idl_path_matcher.dart';
 import 'validation_issue.dart';
 
 /// Validates Anchor account relation targets.
@@ -40,19 +41,8 @@ final class RelationValidationRule {
 
   bool _containsPath(Set<String> paths, String relation) {
     for (final path in paths) {
-      if (_canonicalPath(path) == _canonicalPath(relation)) return true;
+      if (IdlPathMatcher.pathsMatch(path, relation)) return true;
     }
     return false;
   }
-
-  String _canonicalPath(String path) =>
-      path.split('.').map(_canonicalSegment).join('.');
-
-  String _canonicalSegment(String value) => value
-      .replaceAllMapped(
-        RegExp('([a-z0-9])([A-Z])'),
-        (match) => '${match[1]}_${match[2]}',
-      )
-      .replaceAll(RegExp('[^A-Za-z0-9]+'), '_')
-      .toLowerCase();
 }

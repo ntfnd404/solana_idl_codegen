@@ -1,4 +1,5 @@
 import '../../idl.dart';
+import '../../idl_path_matcher.dart';
 import '../account_leaf.dart';
 import '../generator_context.dart';
 import 'pda_account_data_seed_emitter.dart';
@@ -56,7 +57,7 @@ final class PdaSeedEmitter {
         if (kind == 'arg') {
           final root = path.split('.').first;
           final argument = instruction.arguments.firstWhere(
-            (item) => _segmentsMatch(item.name, root),
+            (item) => IdlPathMatcher.segmentsMatch(item.name, root),
           );
           final expression = [
             'args',
@@ -69,20 +70,20 @@ final class PdaSeedEmitter {
         } else {
           AccountLeaf? account;
           for (final candidate in leaves) {
-            if (_pathsMatch(candidate.wirePath, path)) {
+            if (IdlPathMatcher.pathsMatch(candidate.wirePath, path)) {
               account = candidate;
               break;
             }
           }
           if (account != null) {
             out.writeln(
-              '${indent}seeds.add(${literals.member(account.path)}!.bytes);',
+              '${indent}seeds.add(${literals.member(account.path)}.bytes);',
             );
             return;
           }
           AccountLeaf? sourceAccount;
           for (final candidate in leaves) {
-            if (_pathHasPrefix(path, candidate.wirePath) &&
+            if (IdlPathMatcher.pathHasPrefix(path, candidate.wirePath) &&
                 (sourceAccount == null ||
                     candidate.wirePath.length >
                         sourceAccount.wirePath.length)) {
@@ -108,33 +109,4 @@ final class PdaSeedEmitter {
     IdlInstruction instruction,
     List<AccountLeaf> leaves,
   ) => PdaProgramExpressionEmitter(_literals).emit(seed, instruction, leaves);
-
-  bool _pathsMatch(String left, String right) =>
-      _canonicalPath(left) == _canonicalPath(right);
-
-  bool _pathHasPrefix(String raw, String candidate) {
-    final rawSegments = raw.split('.');
-    final candidateSegments = candidate.split('.');
-    if (rawSegments.length <= candidateSegments.length) return false;
-    for (var index = 0; index < candidateSegments.length; index++) {
-      if (!_segmentsMatch(rawSegments[index], candidateSegments[index])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool _segmentsMatch(String left, String right) =>
-      _canonicalSegment(left) == _canonicalSegment(right);
-
-  String _canonicalPath(String path) =>
-      path.split('.').map(_canonicalSegment).join('.');
-
-  String _canonicalSegment(String value) => value
-      .replaceAllMapped(
-        RegExp('([a-z0-9])([A-Z])'),
-        (match) => '${match[1]}_${match[2]}',
-      )
-      .replaceAll(RegExp('[^A-Za-z0-9]+'), '_')
-      .toLowerCase();
 }

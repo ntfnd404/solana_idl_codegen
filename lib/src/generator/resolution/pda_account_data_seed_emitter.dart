@@ -1,4 +1,5 @@
 import '../../idl.dart';
+import '../../idl_path_matcher.dart';
 import '../account_leaf.dart';
 import '../generator_context.dart';
 import 'pda_seed_literals.dart';
@@ -155,7 +156,7 @@ final class PdaAccountDataSeedEmitter {
       if (body is! IdlStructBody || body.fields.isEmpty) return null;
       IdlField? field;
       for (final candidate in body.fields) {
-        if (_segmentsMatch(candidate.name, path[index])) {
+        if (IdlPathMatcher.segmentsMatch(candidate.name, path[index])) {
           field = candidate;
           break;
         }
@@ -172,15 +173,4 @@ final class PdaAccountDataSeedEmitter {
     }
     return result;
   }
-
-  bool _segmentsMatch(String left, String right) =>
-      _canonicalSegment(left) == _canonicalSegment(right);
-
-  String _canonicalSegment(String value) => value
-      .replaceAllMapped(
-        RegExp('([a-z0-9])([A-Z])'),
-        (match) => '${match[1]}_${match[2]}',
-      )
-      .replaceAll(RegExp('[^A-Za-z0-9]+'), '_')
-      .toLowerCase();
 }
