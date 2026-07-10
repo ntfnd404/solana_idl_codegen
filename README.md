@@ -281,6 +281,25 @@ transport boundaries, and generated documentation than `dart-coral-xyz`. It
 does not attempt to replace that project's dynamic IDL, Quasar/Pinocchio, or
 SVM APIs.
 
+## Backlog
+
+Multiparser support for non-Anchor Solana IDL dialects is intentionally out of
+scope for the current Anchor backend. A future multiparser layer should define
+an `IdlParser` registry/factory, choose dialect detection policy, add parsers
+for Shank, Codama, and other formats, normalize them into the shared IR, and
+expand the external fixture matrix. The design should not assume a closed set
+of dialects: consumers may need to register any number of custom IDL parsers,
+so public parser extension points need a stable or explicitly experimental IR
+contract before they are exposed.
+
+Validation diagnostic priority can be refined after the current resolver/path
+matching work lands. Canonical account path collisions should eventually be
+reported before generated Dart member naming collisions, while preserving
+`IDL_DART_ACCOUNT_MEMBER_COLLISION` for pure Dart API name clashes. That change
+should be made as a focused validation-pipeline update with fixture expectation
+updates, because it changes which stable diagnostic is reported first for some
+invalid IDLs.
+
 Normal development and pull-request CI do not require Node, npm, Rust,
 Anchor CLI, Solana CLI, Docker, or a local validator.
 
