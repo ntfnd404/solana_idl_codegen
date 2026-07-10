@@ -60,6 +60,7 @@ final class ExampleProgramAbsentAccountOverride
 }
 
 /// Dependencies supplied to generated account resolvers.
+/// Relation/PDA cycles are runtime-resolvable when these dependencies break the cycle.
 final class ExampleProgramResolutionContext {
   /// Creates a resolution context.
   ExampleProgramResolutionContext({
@@ -163,7 +164,9 @@ final class ExampleProgramCreateMessageAccountResolver {
   /// Resolution dependencies.
   final ExampleProgramResolutionContext context;
 
-  /// Resolves overrides, fixed addresses and allow-listed identity.
+  /// Resolves overrides, fixed addresses, identity, PDA, and relations.
+  /// Precedence is use override, absent override, fixed address, identity, PDA, then relation.
+  /// Relation/PDA cycles must be broken by use overrides, identity, or a relation resolver.
   Future<ExampleProgramCreateMessageAccounts> resolve({
     required ExampleProgramCreateMessageArgs args,
     ExampleProgramCreateMessageAccountOverrides overrides =
@@ -171,10 +174,13 @@ final class ExampleProgramCreateMessageAccountResolver {
   }) async {
     final causes = <ExampleProgramAccountResolutionCause>[];
     ExampleProgramAddress? authority;
+    var authoritySuppressed = false;
     switch (overrides.authority) {
       case ExampleProgramUseAccountOverride(:final address):
         authority = address;
+        authoritySuppressed = false;
       case ExampleProgramAbsentAccountOverride():
+        authoritySuppressed = true;
         causes.add(
           const ExampleProgramAccountResolutionCause(
             path: 'authority',
@@ -183,16 +189,20 @@ final class ExampleProgramCreateMessageAccountResolver {
           ),
         );
       case ExampleProgramInheritAccountOverride():
+        authoritySuppressed = false;
         if (context.identityAccountPaths.contains('authority') &&
             context.identity != null) {
           authority = context.identity;
         }
     }
     ExampleProgramAddress? stateMessage;
+    var stateMessageSuppressed = false;
     switch (overrides.stateMessage) {
       case ExampleProgramUseAccountOverride(:final address):
         stateMessage = address;
+        stateMessageSuppressed = false;
       case ExampleProgramAbsentAccountOverride():
+        stateMessageSuppressed = true;
         causes.add(
           const ExampleProgramAccountResolutionCause(
             path: 'state.message',
@@ -201,6 +211,11 @@ final class ExampleProgramCreateMessageAccountResolver {
           ),
         );
       case ExampleProgramInheritAccountOverride():
+        stateMessageSuppressed = false;
+        if (context.identityAccountPaths.contains('state.message') &&
+            context.identity != null) {
+          stateMessage = context.identity;
+        }
     }
     ExampleProgramAddress? optionalReferrer;
     switch (overrides.optionalReferrer) {
@@ -215,10 +230,13 @@ final class ExampleProgramCreateMessageAccountResolver {
         }
     }
     ExampleProgramAddress? systemProgram;
+    var systemProgramSuppressed = false;
     switch (overrides.systemProgram) {
       case ExampleProgramUseAccountOverride(:final address):
         systemProgram = address;
+        systemProgramSuppressed = false;
       case ExampleProgramAbsentAccountOverride():
+        systemProgramSuppressed = true;
         causes.add(
           const ExampleProgramAccountResolutionCause(
             path: 'system_program',
@@ -227,35 +245,44 @@ final class ExampleProgramCreateMessageAccountResolver {
           ),
         );
       case ExampleProgramInheritAccountOverride():
+        systemProgramSuppressed = false;
         systemProgram = ExampleProgramAddress.fromBase58(
           '11111111111111111111111111111111',
         );
     }
-    if (stateMessage == null) {
-      final deriver = context.pdaDeriver;
-      if (deriver != null) {
-        final seeds = <Uint8List>[];
-        seeds.add(Uint8List.fromList(<int>[109, 101, 115, 115, 97, 103, 101]));
-        final seedWriter1 = ExampleProgramBorshWriter();
-        seedWriter1.writeUnsigned(args.id, 8);
-        seeds.add(seedWriter1.takeBytes());
-        for (var index = 0; index < seeds.length; index++) {
-          if (seeds[index].length > 32) {
-            throw ExampleProgramPdaException(
-              code: 'PDA_SEED_LENGTH',
-              message: 'A PDA seed cannot exceed 32 bytes.',
-              seedIndex: index,
-            );
+    for (var pass = 0; pass < 4; pass++) {
+      var progressed = false;
+      if (stateMessage == null && !stateMessageSuppressed) {
+        final deriver = context.pdaDeriver;
+        if (deriver != null) {
+          final seeds = <Uint8List>[];
+          seeds.add(
+            Uint8List.fromList(<int>[109, 101, 115, 115, 97, 103, 101]),
+          );
+          final seedWriter1 = ExampleProgramBorshWriter();
+          seedWriter1.writeUnsigned(args.id, 8);
+          seeds.add(seedWriter1.takeBytes());
+          for (var index = 0; index < seeds.length; index++) {
+            if (seeds[index].length > 32) {
+              throw ExampleProgramPdaException(
+                code: 'PDA_SEED_LENGTH',
+                message: 'A PDA seed cannot exceed 32 bytes.',
+                seedIndex: index,
+              );
+            }
           }
+          final derived = await deriver.derive(
+            programAddress: ExampleProgramProgram.programAddress,
+            seeds: seeds,
+          );
+          stateMessage = derived.address;
+          progressed = true;
         }
-        final derived = await deriver.derive(
-          programAddress: ExampleProgramProgram.programAddress,
-          seeds: seeds,
-        );
-        stateMessage = derived.address;
       }
+      if (stateMessage != null || stateMessageSuppressed) break;
+      if (!progressed) break;
     }
-    if (authority == null) {
+    if (authority == null && !authoritySuppressed) {
       causes.add(
         const ExampleProgramAccountResolutionCause(
           path: 'authority',
@@ -265,7 +292,7 @@ final class ExampleProgramCreateMessageAccountResolver {
         ),
       );
     }
-    if (stateMessage == null) {
+    if (stateMessage == null && !stateMessageSuppressed) {
       causes.add(
         const ExampleProgramAccountResolutionCause(
           path: 'state.message',
@@ -275,7 +302,7 @@ final class ExampleProgramCreateMessageAccountResolver {
         ),
       );
     }
-    if (systemProgram == null) {
+    if (systemProgram == null && !systemProgramSuppressed) {
       causes.add(
         const ExampleProgramAccountResolutionCause(
           path: 'system_program',
@@ -328,7 +355,9 @@ final class ExampleProgramReadMessageAccountResolver {
   /// Resolution dependencies.
   final ExampleProgramResolutionContext context;
 
-  /// Resolves overrides, fixed addresses and allow-listed identity.
+  /// Resolves overrides, fixed addresses, identity, PDA, and relations.
+  /// Precedence is use override, absent override, fixed address, identity, PDA, then relation.
+  /// Relation/PDA cycles must be broken by use overrides, identity, or a relation resolver.
   Future<ExampleProgramReadMessageAccounts> resolve({
     required ExampleProgramReadMessageArgs args,
     ExampleProgramReadMessageAccountOverrides overrides =
@@ -336,10 +365,13 @@ final class ExampleProgramReadMessageAccountResolver {
   }) async {
     final causes = <ExampleProgramAccountResolutionCause>[];
     ExampleProgramAddress? message;
+    var messageSuppressed = false;
     switch (overrides.message) {
       case ExampleProgramUseAccountOverride(:final address):
         message = address;
+        messageSuppressed = false;
       case ExampleProgramAbsentAccountOverride():
+        messageSuppressed = true;
         causes.add(
           const ExampleProgramAccountResolutionCause(
             path: 'message',
@@ -348,12 +380,13 @@ final class ExampleProgramReadMessageAccountResolver {
           ),
         );
       case ExampleProgramInheritAccountOverride():
+        messageSuppressed = false;
         if (context.identityAccountPaths.contains('message') &&
             context.identity != null) {
           message = context.identity;
         }
     }
-    if (message == null) {
+    if (message == null && !messageSuppressed) {
       causes.add(
         const ExampleProgramAccountResolutionCause(
           path: 'message',

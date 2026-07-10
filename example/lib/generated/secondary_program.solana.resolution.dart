@@ -60,6 +60,7 @@ final class SecondaryProgramAbsentAccountOverride
 }
 
 /// Dependencies supplied to generated account resolvers.
+/// Relation/PDA cycles are runtime-resolvable when these dependencies break the cycle.
 final class SecondaryProgramResolutionContext {
   /// Creates a resolution context.
   SecondaryProgramResolutionContext({
@@ -152,7 +153,9 @@ final class SecondaryProgramConsumeAccountResolver {
   /// Resolution dependencies.
   final SecondaryProgramResolutionContext context;
 
-  /// Resolves overrides, fixed addresses and allow-listed identity.
+  /// Resolves overrides, fixed addresses, identity, PDA, and relations.
+  /// Precedence is use override, absent override, fixed address, identity, PDA, then relation.
+  /// Relation/PDA cycles must be broken by use overrides, identity, or a relation resolver.
   Future<SecondaryProgramConsumeAccounts> resolve({
     required SecondaryProgramConsumeArgs args,
     SecondaryProgramConsumeAccountOverrides overrides =
@@ -160,10 +163,13 @@ final class SecondaryProgramConsumeAccountResolver {
   }) async {
     final causes = <SecondaryProgramAccountResolutionCause>[];
     SecondaryProgramAddress? authority;
+    var authoritySuppressed = false;
     switch (overrides.authority) {
       case SecondaryProgramUseAccountOverride(:final address):
         authority = address;
+        authoritySuppressed = false;
       case SecondaryProgramAbsentAccountOverride():
+        authoritySuppressed = true;
         causes.add(
           const SecondaryProgramAccountResolutionCause(
             path: 'authority',
@@ -172,12 +178,13 @@ final class SecondaryProgramConsumeAccountResolver {
           ),
         );
       case SecondaryProgramInheritAccountOverride():
+        authoritySuppressed = false;
         if (context.identityAccountPaths.contains('authority') &&
             context.identity != null) {
           authority = context.identity;
         }
     }
-    if (authority == null) {
+    if (authority == null && !authoritySuppressed) {
       causes.add(
         const SecondaryProgramAccountResolutionCause(
           path: 'authority',
