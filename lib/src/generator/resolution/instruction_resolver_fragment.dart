@@ -70,7 +70,13 @@ final class InstructionResolverFragment extends SectionEmitter {
                 ..returns = refer('Future<$accounts>')
                 ..modifier = MethodModifier.async
                 ..docs.add(
-                  '/// Resolves overrides, fixed addresses and allow-listed identity.',
+                  '/// Resolves overrides, fixed addresses, identity, PDA, and relations.',
+                )
+                ..docs.add(
+                  '/// Precedence is use override, absent override, fixed address, identity, PDA, then relation.',
+                )
+                ..docs.add(
+                  '/// Relation/PDA cycles must be broken by use overrides, identity, or a relation resolver.',
                 )
                 ..optionalParameters.addAll([
                   _requiredNamed('args', args),

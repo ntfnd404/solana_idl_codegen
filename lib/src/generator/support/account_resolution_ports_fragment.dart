@@ -34,7 +34,10 @@ final class AccountResolutionPortsSupportFragment extends SectionEmitter {
             ..name = 'resolveRelation'
             ..returns = refer('Future<$address?>')
             ..docs.add(
-              '/// Resolves [relationPath] or returns `null` when unavailable.',
+              '/// Resolves [relationPath] or returns `null` for the current resolved account set.',
+            )
+            ..docs.add(
+              '/// Implementations should be deterministic for the supplied arguments.',
             )
             ..optionalParameters.addAll([
               _namedParameter('accountPath', 'String'),

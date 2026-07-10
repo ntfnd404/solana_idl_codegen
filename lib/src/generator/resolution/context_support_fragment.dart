@@ -19,6 +19,9 @@ final class ContextSupportFragment extends SectionEmitter {
         ..name = name
         ..modifier = ClassModifier.final$
         ..docs.add('/// Dependencies supplied to generated account resolvers.')
+        ..docs.add(
+          '/// Relation/PDA cycles are runtime-resolvable when these dependencies break the cycle.',
+        )
         ..constructors.add(
           Constructor(
             (builder) => builder
