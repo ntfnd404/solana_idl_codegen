@@ -315,6 +315,38 @@ void main() {
       wire.data.isEmpty) {
     throw StateError('Generated instruction wire shape is invalid.');
   }
+  final accountBytes = <int>[
+    ...ExampleProgramMessageAccount.discriminator,
+    ...encoded,
+    0,
+  ];
+  if (ExampleProgramMessageAccount.tryDecodeAccount(accountBytes) != message) {
+    throw StateError('Generated account tryDecode failed.');
+  }
+  if (ExampleProgramMessageAccount.tryDecodeAccount([1, 2, 3]) != null) {
+    throw StateError('Generated account tryDecode accepted short data.');
+  }
+  if (ExampleProgramAccountRegistry.byName['Message']?.discriminatorLength !=
+      ExampleProgramMessageAccount.discriminatorLength) {
+    throw StateError('Generated account metadata registry is invalid.');
+  }
+  final createMetadata = ExampleProgramCreateMessageRequest.metadata;
+  if (ExampleProgramInstructionRegistry.byName['create_message'] !=
+          createMetadata ||
+      createMetadata.accounts.length != wire.accounts.length ||
+      createMetadata.accounts[0].path != 'authority' ||
+      !createMetadata.accounts[0].isSigner ||
+      createMetadata.accounts[0].isWritable) {
+    throw StateError('Generated instruction metadata registry is invalid.');
+  }
+  if (ExampleProgramProgramErrorParser.nameForCode(6000) != 'EmptyMessage' ||
+      ExampleProgramProgramErrorParser.messageForCode(6000) !=
+          'Message text cannot be empty' ||
+      ExampleProgramProgramErrorParser.codeForName('EmptyMessage') != 6000 ||
+      !ExampleProgramProgramErrorParser.isKnownCode(6000) ||
+      ExampleProgramProgramErrorParser.nameForCode(9999) != null) {
+    throw StateError('Generated error lookup helpers are invalid.');
+  }
   ${includeSecondary ? "if (secondaryZero.bytes.length != 32) throw StateError('Secondary SDK did not compile.');" : ''}
 }
 ''';

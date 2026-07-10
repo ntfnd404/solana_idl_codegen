@@ -22,6 +22,51 @@ final class InstructionsEmitter extends SectionEmitter {
         accounts.emitClass(instruction),
         requests.emitClass(instruction),
       ],
+      _instructionRegistry(),
     ]);
+  }
+
+  Class _instructionRegistry() {
+    final metadata = type('instruction_metadata');
+    return Class(
+      (builder) => builder
+        ..name = type('instruction_registry')
+        ..abstract = true
+        ..modifier = ClassModifier.final$
+        ..docs.add(
+          '/// Program-level registry of generated instruction metadata.',
+        )
+        ..fields.addAll([
+          Field(
+            (builder) => builder
+              ..name = 'instructions'
+              ..type = refer('List<$metadata>')
+              ..static = true
+              ..modifier = FieldModifier.final$
+              ..docs.add(
+                '/// Instructions declared by the IDL in source order.',
+              )
+              ..assignment = Code(
+                'List.unmodifiable(<$metadata>['
+                '${context.program.instructions.map((instruction) => '${context.helpers(instruction).request}.metadata').join(', ')}'
+                '])',
+              ),
+          ),
+          Field(
+            (builder) => builder
+              ..name = 'byName'
+              ..type = refer('Map<String, $metadata>')
+              ..static = true
+              ..modifier = FieldModifier.final$
+              ..docs.add(
+                '/// Instruction metadata indexed by IDL instruction name.',
+              )
+              ..assignment = const Code(
+                'Map.unmodifiable({for (final instruction in instructions) '
+                'instruction.name: instruction})',
+              ),
+          ),
+        ]),
+    );
   }
 }

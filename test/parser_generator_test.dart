@@ -93,6 +93,22 @@ void main() {
 }
 ''');
       expect(collision.diagnostics.single.code, 'IDL_DART_MEMBER_COLLISION');
+
+      final infrastructureCollision = generator.validateString('''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "program", "version": "1", "spec": "0.1.0"},
+  "instructions": [],
+  "types": [{
+    "name": "account_metadata",
+    "type": {"kind": "struct", "fields": []}
+  }]
+}
+''');
+      expect(
+        infrastructureCollision.diagnostics.single.code,
+        'IDL_DART_NAME_COLLISION',
+      );
     });
 
     test('rejects unsupported PDA seeds before emission', () {

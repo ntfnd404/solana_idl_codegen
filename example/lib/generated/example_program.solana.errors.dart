@@ -143,6 +143,33 @@ final class ExampleProgramUnknownProgramException
 
 /// Parses numeric program failures into typed exceptions.
 abstract final class ExampleProgramProgramErrorParser {
+  /// Returns the IDL error name for [code], if known.
+  static String? nameForCode(int code) {
+    return switch (code) {
+      6000 => 'EmptyMessage',
+      _ => null,
+    };
+  }
+
+  /// Returns the IDL error message for [code], if known.
+  static String? messageForCode(int code) {
+    return switch (code) {
+      6000 => 'Message text cannot be empty',
+      _ => null,
+    };
+  }
+
+  /// Returns the numeric code for [name], if known.
+  static int? codeForName(String name) {
+    return switch (name) {
+      'EmptyMessage' => 6000,
+      _ => null,
+    };
+  }
+
+  /// Whether [code] is declared by this IDL.
+  static bool isKnownCode(int code) => nameForCode(code) != null;
+
   /// Creates a typed error for [code].
   static ExampleProgramProgramException fromCode(
     int code, {

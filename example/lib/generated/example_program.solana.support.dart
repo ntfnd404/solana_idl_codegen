@@ -123,6 +123,74 @@ final class ExampleProgramInstruction {
   );
 }
 
+/// Immutable metadata for one generated account decoder.
+final class ExampleProgramAccountMetadata {
+  /// Creates account metadata and copies byte lists.
+  ExampleProgramAccountMetadata({
+    required this.name,
+    required List<int> discriminator,
+  }) : discriminator = List.unmodifiable(discriminator);
+
+  /// IDL account name.
+  final String name;
+
+  /// Account discriminator bytes.
+  final List<int> discriminator;
+
+  /// Number of discriminator bytes.
+  int get discriminatorLength => discriminator.length;
+}
+
+/// Immutable metadata for one instruction account position.
+final class ExampleProgramInstructionAccountMetadata {
+  /// Creates instruction account metadata.
+  const ExampleProgramInstructionAccountMetadata({
+    required this.name,
+    required this.path,
+    required this.isSigner,
+    required this.isWritable,
+    required this.isOptional,
+  });
+
+  /// Leaf account name from the IDL.
+  final String name;
+
+  /// Dot-separated account path from the IDL.
+  final String path;
+
+  /// Whether this account signs.
+  final bool isSigner;
+
+  /// Whether this account is writable.
+  final bool isWritable;
+
+  /// Whether this account is optional.
+  final bool isOptional;
+}
+
+/// Immutable metadata for one generated instruction.
+final class ExampleProgramInstructionMetadata {
+  /// Creates instruction metadata and copies collections.
+  ExampleProgramInstructionMetadata({
+    required this.name,
+    required List<int> discriminator,
+    required List<ExampleProgramInstructionAccountMetadata> accounts,
+  }) : discriminator = List.unmodifiable(discriminator),
+       accounts = List.unmodifiable(accounts);
+
+  /// IDL instruction name.
+  final String name;
+
+  /// Instruction discriminator bytes.
+  final List<int> discriminator;
+
+  /// Ordered account metadata. Duplicate positions are preserved.
+  final List<ExampleProgramInstructionAccountMetadata> accounts;
+
+  /// Number of discriminator bytes.
+  int get discriminatorLength => discriminator.length;
+}
+
 /// Resource limits applied by every public Borsh decoder.
 final class ExampleProgramDecodeLimits {
   /// Creates explicit decoder limits.
@@ -1026,7 +1094,8 @@ final class ExampleProgramPdaDeriverCallback
 
 /// Port used for application-specific account relation resolution.
 abstract interface class ExampleProgramRelationResolver {
-  /// Resolves [relationPath] or returns `null` when unavailable.
+  /// Resolves [relationPath] or returns `null` for the current resolved account set.
+  /// Implementations should be deterministic for the supplied arguments.
   Future<ExampleProgramAddress?> resolveRelation({
     required String accountPath,
     required String relationPath,

@@ -210,6 +210,20 @@ Future<void> main() async {
   ];
   final decoded = ReferenceRuntimeStateAccount.decodeAccount(accountBytes);
   if (decoded != some) throw StateError('Account decode failed.');
+  final tryDecoded = ReferenceRuntimeStateAccount.tryDecodeAccount(
+    accountBytes,
+  );
+  if (tryDecoded != some) throw StateError('Account tryDecode failed.');
+  if (ReferenceRuntimeStateAccount.tryDecodeAccount([
+        99,
+        ...accountBytes.skip(1),
+      ]) !=
+      null) {
+    throw StateError('Account tryDecode accepted wrong discriminator.');
+  }
+  if (ReferenceRuntimeStateAccount.tryDecodeAccount([1, 2, 3]) != null) {
+    throw StateError('Account tryDecode accepted a short discriminator.');
+  }
   try {
     ReferenceRuntimeStateAccount.decodeAccountExact(accountBytes);
     throw StateError('Exact account decoder accepted trailing bytes.');
@@ -224,6 +238,51 @@ Future<void> main() async {
     throw StateError('Account discriminator mismatch was accepted.');
   } on FormatException {
     // Expected.
+  }
+  try {
+    ReferenceRuntimeStateAccount.tryDecodeAccount([
+      ...ReferenceRuntimeStateAccount.discriminator,
+      4,
+      0,
+      0,
+      0,
+      116,
+      101,
+      115,
+      116,
+      ...List<int>.filled(32, 0),
+      2,
+      0,
+      0,
+      0,
+      ...List<int>.filled(8, 0),
+    ]);
+    throw StateError('Account tryDecode swallowed malformed payload.');
+  } on ReferenceRuntimeBorshException catch (error) {
+    if (error.code != 'BORSH_INVALID_OPTION') rethrow;
+  }
+
+  if (ReferenceRuntimeStateAccount.name != 'State' ||
+      ReferenceRuntimeStateAccount.discriminatorLength != 8 ||
+      ReferenceRuntimeStateAccount.metadata.name != 'State' ||
+      hex(ReferenceRuntimeStateAccount.metadata.discriminator) !=
+          hex(ReferenceRuntimeStateAccount.discriminator) ||
+      ReferenceRuntimeAccountRegistry.accounts.length != 1 ||
+      ReferenceRuntimeAccountRegistry.byName['State']?.name != 'State') {
+    throw StateError('Account metadata registry mismatch.');
+  }
+  final deriveMetadata = ReferenceRuntimeDeriveRequest.metadata;
+  if (ReferenceRuntimeDeriveRequest.name != 'derive' ||
+      ReferenceRuntimeDeriveRequest.discriminatorLength != 8 ||
+      deriveMetadata.accounts.length != 1 ||
+      deriveMetadata.accounts.single.path != 'state' ||
+      deriveMetadata.accounts.single.name != 'state' ||
+      deriveMetadata.accounts.single.isSigner ||
+      deriveMetadata.accounts.single.isWritable ||
+      deriveMetadata.accounts.single.isOptional ||
+      ReferenceRuntimeInstructionRegistry.instructions.length != 1 ||
+      ReferenceRuntimeInstructionRegistry.byName['derive']?.name != 'derive') {
+    throw StateError('Instruction metadata registry mismatch.');
   }
 
   final malformedCOption = <int>[
@@ -358,6 +417,24 @@ Future<void> main() async {
     'Program log: AnchorError caused by account: state. '
         'Error Code: BadState. Error Number: 6000. Error Message: Bad state.',
   ]);
+  if (ReferenceRuntimeProgramErrorParser.nameForCode(6000) != 'BadState' ||
+      ReferenceRuntimeProgramErrorParser.messageForCode(6000) != 'Bad state' ||
+      ReferenceRuntimeProgramErrorParser.codeForName('BadState') != 6000 ||
+      !ReferenceRuntimeProgramErrorParser.isKnownCode(6000) ||
+      ReferenceRuntimeProgramErrorParser.nameForCode(9999) != null ||
+      ReferenceRuntimeProgramErrorParser.messageForCode(9999) != null ||
+      ReferenceRuntimeProgramErrorParser.codeForName('Missing') != null ||
+      ReferenceRuntimeProgramErrorParser.isKnownCode(9999)) {
+    throw StateError('Program error lookup helpers failed.');
+  }
+  if (ReferenceRuntimeProgramErrorParser.fromCode(6000)
+      is! ReferenceRuntimeBadStateException) {
+    throw StateError('Known error fromCode did not return typed exception.');
+  }
+  if (ReferenceRuntimeProgramErrorParser.fromCode(9999)
+      is! ReferenceRuntimeUnknownProgramException) {
+    throw StateError('Unknown error fromCode did not preserve unknown code.');
+  }
   if (error is! ReferenceRuntimeBadStateException ||
       error.origin is! ReferenceRuntimeAccountErrorOrigin ||
       error.rawLogs.length != 1) {

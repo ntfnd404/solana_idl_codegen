@@ -12,6 +12,7 @@ final class AccountDecoderEmitter extends SectionEmitter {
   List<Spec> emit() => List.unmodifiable([
     for (final account in context.program.accounts)
       accountDecoder(account.name, account.discriminator),
+    _accountRegistry(),
   ]);
 
   /// Emits one account decoder helper class.
@@ -38,7 +39,40 @@ final class AccountDecoderEmitter extends SectionEmitter {
               ..assignment = Code('List.unmodifiable(${bytes(discriminator)})'),
           ),
         )
+        ..fields.addAll([
+          Field(
+            (builder) => builder
+              ..name = 'name'
+              ..type = refer('String')
+              ..static = true
+              ..modifier = FieldModifier.constant
+              ..docs.add('/// IDL account name.')
+              ..assignment = Code("'${escape(accountName)}'"),
+          ),
+          Field(
+            (builder) => builder
+              ..name = 'discriminatorLength'
+              ..type = refer('int')
+              ..static = true
+              ..modifier = FieldModifier.constant
+              ..docs.add('/// Number of discriminator bytes.')
+              ..assignment = Code('${discriminator.length}'),
+          ),
+          Field(
+            (builder) => builder
+              ..name = 'metadata'
+              ..type = refer(type('account_metadata'))
+              ..static = true
+              ..modifier = FieldModifier.final$
+              ..docs.add('/// Data-only account metadata.')
+              ..assignment = Code(
+                "${type('account_metadata')}(name: name, "
+                'discriminator: discriminator)',
+              ),
+          ),
+        ])
         ..methods.addAll([
+          _tryDecodeMethod(model: model, limits: limits),
           _decodeMethod(
             name: 'decodeAccount',
             model: model,
@@ -61,15 +95,93 @@ final class AccountDecoderEmitter extends SectionEmitter {
 if (data.length < discriminator.length) {
   throw FormatException('Account data is shorter than its discriminator.');
 }
-for (var index = 0; index < discriminator.length; index++) {
-  if (data[index] != discriminator[index]) {
-    throw FormatException('Account discriminator mismatch.');
-  }
+if (!_hasDiscriminator(data)) {
+  throw FormatException('Account discriminator mismatch.');
 }'''),
+          ),
+          Method(
+            (builder) => builder
+              ..name = '_hasDiscriminator'
+              ..static = true
+              ..returns = refer('bool')
+              ..requiredParameters.add(_parameter('data', 'List<int>'))
+              ..body = const Code('''
+if (data.length < discriminator.length) return false;
+for (var index = 0; index < discriminator.length; index++) {
+  if (data[index] != discriminator[index]) return false;
+}
+return true;'''),
           ),
         ]),
     );
   }
+
+  Class _accountRegistry() {
+    final metadata = type('account_metadata');
+    return Class(
+      (builder) => builder
+        ..name = type('account_registry')
+        ..abstract = true
+        ..modifier = ClassModifier.final$
+        ..docs.add('/// Program-level registry of generated account metadata.')
+        ..fields.addAll([
+          Field(
+            (builder) => builder
+              ..name = 'accounts'
+              ..type = refer('List<$metadata>')
+              ..static = true
+              ..modifier = FieldModifier.final$
+              ..docs.add('/// Accounts declared by the IDL in source order.')
+              ..assignment = Code(
+                'List.unmodifiable(<$metadata>['
+                '${context.program.accounts.map((account) => '${type('${account.name}_account')}.metadata').join(', ')}'
+                '])',
+              ),
+          ),
+          Field(
+            (builder) => builder
+              ..name = 'byName'
+              ..type = refer('Map<String, $metadata>')
+              ..static = true
+              ..modifier = FieldModifier.final$
+              ..docs.add('/// Account metadata indexed by IDL account name.')
+              ..assignment = const Code(
+                'Map.unmodifiable({for (final account in accounts) '
+                'account.name: account})',
+              ),
+          ),
+        ]),
+    );
+  }
+
+  Method _tryDecodeMethod({
+    required String model,
+    required String limits,
+  }) => Method(
+    (builder) => builder
+      ..name = 'tryDecodeAccount'
+      ..static = true
+      ..returns = refer('$model?')
+      ..docs.add(
+        '/// Decodes account data or returns `null` on discriminator mismatch.',
+      )
+      ..requiredParameters.add(_parameter('data', 'List<int>'))
+      ..optionalParameters.add(
+        Parameter(
+          (builder) => builder
+            ..name = 'limits'
+            ..type = refer(limits)
+            ..named = true
+            ..defaultTo = Code('$limits.defaults'),
+        ),
+      )
+      ..body = Code('''
+if (!_hasDiscriminator(data)) return null;
+return $model.codec.decodePrefix(
+  data.sublist(discriminator.length),
+  limits: limits,
+).value;'''),
+  );
 
   Method _decodeMethod({
     required String name,

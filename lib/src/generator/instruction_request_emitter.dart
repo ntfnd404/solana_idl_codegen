@@ -56,6 +56,44 @@ final class InstructionRequestEmitter extends SectionEmitter {
           ),
         )
         ..fields.addAll([
+          Field(
+            (builder) => builder
+              ..name = 'name'
+              ..type = refer('String')
+              ..static = true
+              ..modifier = FieldModifier.constant
+              ..docs.add('/// IDL instruction name.')
+              ..assignment = Code("'${escape(instruction.name)}'"),
+          ),
+          Field(
+            (builder) => builder
+              ..name = 'discriminator'
+              ..type = refer('List<int>')
+              ..static = true
+              ..modifier = FieldModifier.final$
+              ..docs.add('/// IDL discriminator bytes.')
+              ..assignment = Code(
+                'List.unmodifiable(${bytes(instruction.discriminator)})',
+              ),
+          ),
+          Field(
+            (builder) => builder
+              ..name = 'discriminatorLength'
+              ..type = refer('int')
+              ..static = true
+              ..modifier = FieldModifier.constant
+              ..docs.add('/// Number of discriminator bytes.')
+              ..assignment = Code('${instruction.discriminator.length}'),
+          ),
+          Field(
+            (builder) => builder
+              ..name = 'metadata'
+              ..type = refer(type('instruction_metadata'))
+              ..static = true
+              ..modifier = FieldModifier.final$
+              ..docs.add('/// Data-only instruction metadata.')
+              ..assignment = Code(_metadataValue(instruction)),
+          ),
           _field('args', args, 'Typed instruction arguments.'),
           _field('accounts', accounts, 'Fully resolved accounts.'),
           _field(
@@ -74,6 +112,30 @@ final class InstructionRequestEmitter extends SectionEmitter {
           ),
         ),
     );
+  }
+
+  String _metadataValue(IdlInstruction instruction) {
+    final out = StringBuffer()
+      ..writeln('${type('instruction_metadata')}(')
+      ..writeln('  name: name,')
+      ..writeln('  discriminator: discriminator,')
+      ..writeln('  accounts: [');
+    for (final leaf in const AccountLeafFlattener().flatten(
+      instruction.accounts,
+    )) {
+      out
+        ..writeln('    ${type('instruction_account_metadata')}(')
+        ..writeln("      name: '${escape(leaf.item.name)}',")
+        ..writeln("      path: '${escape(leaf.wirePath)}',")
+        ..writeln('      isSigner: ${leaf.item.signer},')
+        ..writeln('      isWritable: ${leaf.item.writable},')
+        ..writeln('      isOptional: ${leaf.item.optional},')
+        ..writeln('    ),');
+    }
+    out
+      ..writeln('  ],')
+      ..write(')');
+    return out.toString();
   }
 
   String _instructionBody(IdlInstruction instruction) {

@@ -124,6 +124,74 @@ final class SecondaryProgramInstruction {
   );
 }
 
+/// Immutable metadata for one generated account decoder.
+final class SecondaryProgramAccountMetadata {
+  /// Creates account metadata and copies byte lists.
+  SecondaryProgramAccountMetadata({
+    required this.name,
+    required List<int> discriminator,
+  }) : discriminator = List.unmodifiable(discriminator);
+
+  /// IDL account name.
+  final String name;
+
+  /// Account discriminator bytes.
+  final List<int> discriminator;
+
+  /// Number of discriminator bytes.
+  int get discriminatorLength => discriminator.length;
+}
+
+/// Immutable metadata for one instruction account position.
+final class SecondaryProgramInstructionAccountMetadata {
+  /// Creates instruction account metadata.
+  const SecondaryProgramInstructionAccountMetadata({
+    required this.name,
+    required this.path,
+    required this.isSigner,
+    required this.isWritable,
+    required this.isOptional,
+  });
+
+  /// Leaf account name from the IDL.
+  final String name;
+
+  /// Dot-separated account path from the IDL.
+  final String path;
+
+  /// Whether this account signs.
+  final bool isSigner;
+
+  /// Whether this account is writable.
+  final bool isWritable;
+
+  /// Whether this account is optional.
+  final bool isOptional;
+}
+
+/// Immutable metadata for one generated instruction.
+final class SecondaryProgramInstructionMetadata {
+  /// Creates instruction metadata and copies collections.
+  SecondaryProgramInstructionMetadata({
+    required this.name,
+    required List<int> discriminator,
+    required List<SecondaryProgramInstructionAccountMetadata> accounts,
+  }) : discriminator = List.unmodifiable(discriminator),
+       accounts = List.unmodifiable(accounts);
+
+  /// IDL instruction name.
+  final String name;
+
+  /// Instruction discriminator bytes.
+  final List<int> discriminator;
+
+  /// Ordered account metadata. Duplicate positions are preserved.
+  final List<SecondaryProgramInstructionAccountMetadata> accounts;
+
+  /// Number of discriminator bytes.
+  int get discriminatorLength => discriminator.length;
+}
+
 /// Resource limits applied by every public Borsh decoder.
 final class SecondaryProgramDecodeLimits {
   /// Creates explicit decoder limits.
@@ -1030,7 +1098,8 @@ final class SecondaryProgramPdaDeriverCallback
 
 /// Port used for application-specific account relation resolution.
 abstract interface class SecondaryProgramRelationResolver {
-  /// Resolves [relationPath] or returns `null` when unavailable.
+  /// Resolves [relationPath] or returns `null` for the current resolved account set.
+  /// Implementations should be deterministic for the supplied arguments.
   Future<SecondaryProgramAddress?> resolveRelation({
     required String accountPath,
     required String relationPath,

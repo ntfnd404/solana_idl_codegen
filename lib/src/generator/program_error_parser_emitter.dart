@@ -20,6 +20,45 @@ final class ProgramErrorParserEmitter extends SectionEmitter {
       ..methods.addAll([
         Method(
           (builder) => builder
+            ..name = 'nameForCode'
+            ..static = true
+            ..returns = refer('String?')
+            ..docs.add('/// Returns the IDL error name for [code], if known.')
+            ..requiredParameters.add(_parameter('code', 'int'))
+            ..body = Code(_lookupBody('idlName')),
+        ),
+        Method(
+          (builder) => builder
+            ..name = 'messageForCode'
+            ..static = true
+            ..returns = refer('String?')
+            ..docs.add(
+              '/// Returns the IDL error message for [code], if known.',
+            )
+            ..requiredParameters.add(_parameter('code', 'int'))
+            ..body = Code(_lookupBody('idlMessage')),
+        ),
+        Method(
+          (builder) => builder
+            ..name = 'codeForName'
+            ..static = true
+            ..returns = refer('int?')
+            ..docs.add('/// Returns the numeric code for [name], if known.')
+            ..requiredParameters.add(_parameter('name', 'String'))
+            ..body = Code(_codeForNameBody()),
+        ),
+        Method(
+          (builder) => builder
+            ..name = 'isKnownCode'
+            ..static = true
+            ..returns = refer('bool')
+            ..docs.add('/// Whether [code] is declared by this IDL.')
+            ..requiredParameters.add(_parameter('code', 'int'))
+            ..lambda = true
+            ..body = const Code('nameForCode(code) != null'),
+        ),
+        Method(
+          (builder) => builder
             ..name = 'fromCode'
             ..static = true
             ..returns = refer(type('program_exception'))
@@ -45,6 +84,29 @@ final class ProgramErrorParserEmitter extends SectionEmitter {
         ),
       ]),
   );
+
+  String _lookupBody(String field) {
+    final out = StringBuffer()..writeln('return switch (code) {');
+    for (final error in context.program.errors) {
+      final value = field == 'idlName' ? error.name : error.message;
+      out.writeln("  ${error.code} => '${escape(value)}',");
+    }
+    out
+      ..writeln('  _ => null,')
+      ..write('};');
+    return out.toString();
+  }
+
+  String _codeForNameBody() {
+    final out = StringBuffer()..writeln('return switch (name) {');
+    for (final error in context.program.errors) {
+      out.writeln("  '${escape(error.name)}' => ${error.code},");
+    }
+    out
+      ..writeln('  _ => null,')
+      ..write('};');
+    return out.toString();
+  }
 
   String _fromCodeBody() {
     final out = StringBuffer()..writeln('return switch (code) {');

@@ -73,6 +73,61 @@ final class ExampleProgramCreateMessageRequest {
     List<ExampleProgramAccountMeta> remainingAccounts = const [],
   }) : remainingAccounts = List.unmodifiable(remainingAccounts);
 
+  /// IDL instruction name.
+  static const String name = 'create_message';
+
+  /// IDL discriminator bytes.
+  static final List<int> discriminator = List.unmodifiable(<int>[
+    34,
+    211,
+    52,
+    19,
+    81,
+    9,
+    201,
+    7,
+  ]);
+
+  /// Number of discriminator bytes.
+  static const int discriminatorLength = 8;
+
+  /// Data-only instruction metadata.
+  static final ExampleProgramInstructionMetadata metadata =
+      ExampleProgramInstructionMetadata(
+        name: name,
+        discriminator: discriminator,
+        accounts: [
+          ExampleProgramInstructionAccountMetadata(
+            name: 'authority',
+            path: 'authority',
+            isSigner: true,
+            isWritable: false,
+            isOptional: false,
+          ),
+          ExampleProgramInstructionAccountMetadata(
+            name: 'message',
+            path: 'state.message',
+            isSigner: false,
+            isWritable: true,
+            isOptional: false,
+          ),
+          ExampleProgramInstructionAccountMetadata(
+            name: 'optional_referrer',
+            path: 'optional_referrer',
+            isSigner: false,
+            isWritable: false,
+            isOptional: true,
+          ),
+          ExampleProgramInstructionAccountMetadata(
+            name: 'system_program',
+            path: 'system_program',
+            isSigner: false,
+            isWritable: false,
+            isOptional: false,
+          ),
+        ],
+      );
+
   /// Typed instruction arguments.
   final ExampleProgramCreateMessageArgs args;
 
@@ -149,6 +204,40 @@ final class ExampleProgramReadMessageRequest {
     List<ExampleProgramAccountMeta> remainingAccounts = const [],
   }) : remainingAccounts = List.unmodifiable(remainingAccounts);
 
+  /// IDL instruction name.
+  static const String name = 'read_message';
+
+  /// IDL discriminator bytes.
+  static final List<int> discriminator = List.unmodifiable(<int>[
+    35,
+    212,
+    53,
+    20,
+    82,
+    10,
+    202,
+    8,
+  ]);
+
+  /// Number of discriminator bytes.
+  static const int discriminatorLength = 8;
+
+  /// Data-only instruction metadata.
+  static final ExampleProgramInstructionMetadata metadata =
+      ExampleProgramInstructionMetadata(
+        name: name,
+        discriminator: discriminator,
+        accounts: [
+          ExampleProgramInstructionAccountMetadata(
+            name: 'message',
+            path: 'message',
+            isSigner: false,
+            isWritable: false,
+            isOptional: false,
+          ),
+        ],
+      );
+
   /// Typed instruction arguments.
   final ExampleProgramReadMessageArgs args;
 
@@ -176,4 +265,20 @@ final class ExampleProgramReadMessageRequest {
       data: writer.takeBytes(),
     );
   }
+}
+
+/// Program-level registry of generated instruction metadata.
+abstract final class ExampleProgramInstructionRegistry {
+  /// Instructions declared by the IDL in source order.
+  static final List<ExampleProgramInstructionMetadata> instructions =
+      List.unmodifiable(<ExampleProgramInstructionMetadata>[
+        ExampleProgramCreateMessageRequest.metadata,
+        ExampleProgramReadMessageRequest.metadata,
+      ]);
+
+  /// Instruction metadata indexed by IDL instruction name.
+  static final Map<String, ExampleProgramInstructionMetadata> byName =
+      Map.unmodifiable({
+        for (final instruction in instructions) instruction.name: instruction,
+      });
 }

@@ -26,6 +26,27 @@ abstract final class ExampleProgramMessageAccount {
     1,
   ]);
 
+  /// IDL account name.
+  static const String name = 'Message';
+
+  /// Number of discriminator bytes.
+  static const int discriminatorLength = 8;
+
+  /// Data-only account metadata.
+  static final ExampleProgramAccountMetadata metadata =
+      ExampleProgramAccountMetadata(name: name, discriminator: discriminator);
+
+  /// Decodes account data or returns `null` on discriminator mismatch.
+  static ExampleProgramMessage? tryDecodeAccount(
+    List<int> data, {
+    ExampleProgramDecodeLimits limits = ExampleProgramDecodeLimits.defaults,
+  }) {
+    if (!_hasDiscriminator(data)) return null;
+    return ExampleProgramMessage.codec
+        .decodePrefix(data.sublist(discriminator.length), limits: limits)
+        .value;
+  }
+
   /// Decodes account data and permits trailing allocation padding.
   static ExampleProgramMessage decodeAccount(
     List<int> data, {
@@ -53,12 +74,30 @@ abstract final class ExampleProgramMessageAccount {
     if (data.length < discriminator.length) {
       throw FormatException('Account data is shorter than its discriminator.');
     }
-    for (var index = 0; index < discriminator.length; index++) {
-      if (data[index] != discriminator[index]) {
-        throw FormatException('Account discriminator mismatch.');
-      }
+    if (!_hasDiscriminator(data)) {
+      throw FormatException('Account discriminator mismatch.');
     }
   }
+
+  static bool _hasDiscriminator(List<int> data) {
+    if (data.length < discriminator.length) return false;
+    for (var index = 0; index < discriminator.length; index++) {
+      if (data[index] != discriminator[index]) return false;
+    }
+    return true;
+  }
+}
+
+/// Program-level registry of generated account metadata.
+abstract final class ExampleProgramAccountRegistry {
+  /// Accounts declared by the IDL in source order.
+  static final List<ExampleProgramAccountMetadata> accounts = List.unmodifiable(
+    <ExampleProgramAccountMetadata>[ExampleProgramMessageAccount.metadata],
+  );
+
+  /// Account metadata indexed by IDL account name.
+  static final Map<String, ExampleProgramAccountMetadata> byName =
+      Map.unmodifiable({for (final account in accounts) account.name: account});
 }
 
 /// Typed account reader and scanner client.

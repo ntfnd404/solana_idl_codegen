@@ -12,6 +12,17 @@ library;
 import 'secondary_program.solana.support.dart';
 import 'secondary_program.solana.types.dart';
 
+/// Program-level registry of generated account metadata.
+abstract final class SecondaryProgramAccountRegistry {
+  /// Accounts declared by the IDL in source order.
+  static final List<SecondaryProgramAccountMetadata> accounts =
+      List.unmodifiable(<SecondaryProgramAccountMetadata>[]);
+
+  /// Account metadata indexed by IDL account name.
+  static final Map<String, SecondaryProgramAccountMetadata> byName =
+      Map.unmodifiable({for (final account in accounts) account.name: account});
+}
+
 /// Typed account reader and scanner client.
 final class SecondaryProgramAccountsClient {
   /// Creates a client from narrow account capabilities.

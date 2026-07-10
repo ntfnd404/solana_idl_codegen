@@ -57,6 +57,31 @@ final class SecondaryProgramConsumeRequest {
     List<SecondaryProgramAccountMeta> remainingAccounts = const [],
   }) : remainingAccounts = List.unmodifiable(remainingAccounts);
 
+  /// IDL instruction name.
+  static const String name = 'consume';
+
+  /// IDL discriminator bytes.
+  static final List<int> discriminator = List.unmodifiable(<int>[99, 1, 2, 3]);
+
+  /// Number of discriminator bytes.
+  static const int discriminatorLength = 4;
+
+  /// Data-only instruction metadata.
+  static final SecondaryProgramInstructionMetadata metadata =
+      SecondaryProgramInstructionMetadata(
+        name: name,
+        discriminator: discriminator,
+        accounts: [
+          SecondaryProgramInstructionAccountMetadata(
+            name: 'authority',
+            path: 'authority',
+            isSigner: true,
+            isWritable: false,
+            isOptional: false,
+          ),
+        ],
+      );
+
   /// Typed instruction arguments.
   final SecondaryProgramConsumeArgs args;
 
@@ -84,4 +109,19 @@ final class SecondaryProgramConsumeRequest {
       data: writer.takeBytes(),
     );
   }
+}
+
+/// Program-level registry of generated instruction metadata.
+abstract final class SecondaryProgramInstructionRegistry {
+  /// Instructions declared by the IDL in source order.
+  static final List<SecondaryProgramInstructionMetadata> instructions =
+      List.unmodifiable(<SecondaryProgramInstructionMetadata>[
+        SecondaryProgramConsumeRequest.metadata,
+      ]);
+
+  /// Instruction metadata indexed by IDL instruction name.
+  static final Map<String, SecondaryProgramInstructionMetadata> byName =
+      Map.unmodifiable({
+        for (final instruction in instructions) instruction.name: instruction,
+      });
 }

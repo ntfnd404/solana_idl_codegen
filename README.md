@@ -177,6 +177,17 @@ dart run solana_idl_codegen generate lib/idl/program.json \
 dart run solana_idl_codegen clean --output lib/generated
 ```
 
+Generated files can be kept package-private when the SDK is only an internal
+wire boundary. Generate into `lib/src/generated`, import those libraries from
+your adapter layer, and omit them from the package's public barrel:
+
+```shell
+dart run solana_idl_codegen generate lib/idl/program.json \
+  --input-root lib/idl \
+  --output lib/src/generated \
+  --layout modular
+```
+
 The CLI accepts multiple IDLs as one batch. It detects output collisions,
 changed files, stale tool-owned outputs for requested IDL stems, and path
 escape. `clean` deletes only files containing the stable `solana_idl_codegen`
@@ -214,9 +225,11 @@ The generated SDK provides:
   accounts;
 - tri-state account overrides and async account resolution;
 - account `fetch`, `fetchNullable`, `fetchMultiple`, and `all`;
+- account `tryDecodeAccount` probes and data-only account/instruction metadata
+  registries for parity tests;
 - typed views for read-only instructions with return values;
 - invocation-stack event decoding and closeable typed subscriptions;
-- typed IDL errors and unknown-code preservation;
+- typed IDL errors, lookup helpers, and unknown-code preservation;
 - narrow account, scanner, simulator, subscriber, PDA, and relation ports with
   callback adapters.
 
@@ -241,6 +254,13 @@ The same boundary applies to errors: the transaction/RPC layer owns transport
 failure policy, then can pass logs or custom error payloads into generated
 program-error parsers to produce typed program exceptions.
 
+For domain packages, keep the same anti-corruption boundary in the other
+direction: generated account models are wire DTOs, and application-owned
+mappers translate them into domain objects. Protocol quirks such as retryable
+custom errors, idempotent-close semantics, pre/post instruction sequencing,
+chunked application payloads, and append-only account migration compatibility
+belong in that adapter layer rather than in generated code.
+
 The [Flutter example](example/) has Android, iOS, web, Linux, macOS, and
 Windows targets. It composes two generated SDKs, uses mock mode by default,
 and includes an optional application-owned `package:solana` account adapter.
@@ -262,6 +282,14 @@ serialization are recognized and rejected explicitly. Unknown fields, wrong
 JSON types, unresolved references, recursive layouts, discriminator ambiguity,
 and unsupported constants stop generation with a stable diagnostic and JSON
 path. There is no lenient mode and no `dynamic` fallback.
+
+Account decoders intentionally separate two cases: `tryDecodeAccount` returns
+`null` only when the discriminator is absent or different, while malformed data
+with a matching discriminator still throws a generated Borsh exception.
+Non-exact account decode permits trailing allocation padding, but missing
+appended fields are not defaulted by the generator. If a program needs
+append-only migration compatibility, implement that defaulting explicitly in
+the consumer adapter where the versioning policy is known.
 
 ## Multiple IDLs and generated licensing
 
