@@ -21,7 +21,12 @@ void main() {
 
           await _writeConsumerPackage(root, layout, generator);
           await _runDart(root, ['pub', 'get']);
-          await _runDart(root, ['analyze', '.']);
+          await _runDart(root, [
+            'analyze',
+            '--fatal-warnings',
+            '--fatal-infos',
+            '.',
+          ]);
           await _runDart(root, ['run', 'bin/main.dart']);
           await _runDart(root, [
             'compile',
@@ -58,7 +63,12 @@ void main() {
           includeSecondary: true,
         );
         await _runDart(root, ['pub', 'get']);
-        await _runDart(root, ['analyze', '.']);
+        await _runDart(root, [
+          'analyze',
+          '--fatal-warnings',
+          '--fatal-infos',
+          '.',
+        ]);
         await _runDart(root, ['run', 'bin/main.dart']);
         await _runDart(root, [
           'compile',

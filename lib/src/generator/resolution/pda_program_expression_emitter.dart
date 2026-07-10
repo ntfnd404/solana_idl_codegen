@@ -15,8 +15,9 @@ final class PdaProgramExpressionEmitter {
   String emit(
     IdlSeed? seed,
     IdlInstruction instruction,
-    List<AccountLeaf> leaves,
-  ) {
+    List<AccountLeaf> leaves, {
+    required Set<String> promotedAccountPaths,
+  }) {
     if (seed == null) return '${literals.type('program')}.programAddress';
     return switch (seed) {
       IdlConstSeed(value: IdlStringConstValue(:final value)) =>
@@ -25,14 +26,26 @@ final class PdaProgramExpressionEmitter {
         '${literals.type('address')}.fromBytes(${literals.bytes(value)})',
       IdlPathSeed(kind: 'arg', :final path) =>
         'args.${path.split('.').map(literals.member).join('.')}',
-      IdlPathSeed(kind: 'account', :final path) => literals.member(
-        leaves
-            .firstWhere(
-              (item) => IdlPathMatcher.pathsMatch(item.wirePath, path),
-            )
-            .path,
+      IdlPathSeed(kind: 'account', :final path) => _accountExpression(
+        path,
+        leaves,
+        promotedAccountPaths,
       ),
       _ => '${literals.type('program')}.programAddress',
     };
+  }
+
+  String _accountExpression(
+    String path,
+    List<AccountLeaf> leaves,
+    Set<String> promotedAccountPaths,
+  ) {
+    final account = leaves.firstWhere(
+      (item) => IdlPathMatcher.pathsMatch(item.wirePath, path),
+    );
+    if (!promotedAccountPaths.contains(account.wirePath)) {
+      throw StateError('PDA program dependency is not promoted: $path.');
+    }
+    return literals.member(account.path);
   }
 }

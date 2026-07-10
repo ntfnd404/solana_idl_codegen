@@ -327,7 +327,7 @@ void main() {
       }
       final result = await Process.run(
         Platform.resolvedExecutable,
-        ['analyze', directory.path],
+        ['analyze', '--fatal-warnings', '--fatal-infos', directory.path],
         environment: {'HOME': directory.path, 'DART_DISABLE_ANALYTICS': '1'},
       );
       expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
@@ -1049,7 +1049,7 @@ Future<void> main() async {
     await File('${directory.path}/generated.dart').writeAsString(dart);
     final result = await Process.run(
       Platform.resolvedExecutable,
-      ['analyze', directory.path],
+      ['analyze', '--fatal-warnings', '--fatal-infos', directory.path],
       environment: {'HOME': directory.path, 'DART_DISABLE_ANALYTICS': '1'},
     );
     expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');

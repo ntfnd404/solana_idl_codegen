@@ -28,6 +28,9 @@ final class PdaResolutionEmitter extends SectionEmitter {
     final suppressed = resolutionSuppressedMember(leaf, member);
     final item = leaf.item;
     final dependencies = _pdaAccountDependencies(instruction, leaves, item);
+    final promotedAccountPaths = dependencies
+        .map((dependency) => dependency.wirePath)
+        .toSet();
     out
       ..writeln('${indent}if ($local == null && !$suppressed) {')
       ..writeln('$indent  final deriver = context.pdaDeriver;')
@@ -49,12 +52,14 @@ final class PdaResolutionEmitter extends SectionEmitter {
         item.seeds[index],
         nextSeedId++,
         bodyIndent,
+        promotedAccountPaths: promotedAccountPaths,
       );
     }
     final programExpression = _seedEmitter.pdaProgramExpression(
       item.pdaProgram,
       instruction,
       leaves,
+      promotedAccountPaths: promotedAccountPaths,
     );
     out
       ..writeln(

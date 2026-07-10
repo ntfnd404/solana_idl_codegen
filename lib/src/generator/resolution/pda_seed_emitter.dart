@@ -25,8 +25,9 @@ final class PdaSeedEmitter {
     List<AccountLeaf> leaves,
     IdlSeed seed,
     int index,
-    String indent,
-  ) {
+    String indent, {
+    required Set<String> promotedAccountPaths,
+  }) {
     final literals = _literals;
     switch (seed) {
       case IdlConstSeed(:final value, :final valueType):
@@ -76,6 +77,7 @@ final class PdaSeedEmitter {
             }
           }
           if (account != null) {
+            _requirePromoted(account, promotedAccountPaths, path);
             out.writeln(
               '${indent}seeds.add(${literals.member(account.path)}.bytes);',
             );
@@ -95,10 +97,15 @@ final class PdaSeedEmitter {
               'Validated account-data seed has no source account: $path.',
             );
           }
-          PdaAccountDataSeedEmitter(
-            context,
-            literals,
-          ).emit(out, seed, sourceAccount, index, indent);
+          _requirePromoted(sourceAccount, promotedAccountPaths, path);
+          PdaAccountDataSeedEmitter(context, literals).emit(
+            out,
+            seed,
+            sourceAccount,
+            index,
+            indent,
+            promotedAddress: literals.member(sourceAccount.path),
+          );
         }
     }
   }
@@ -107,6 +114,19 @@ final class PdaSeedEmitter {
   String pdaProgramExpression(
     IdlSeed? seed,
     IdlInstruction instruction,
-    List<AccountLeaf> leaves,
-  ) => PdaProgramExpressionEmitter(_literals).emit(seed, instruction, leaves);
+    List<AccountLeaf> leaves, {
+    required Set<String> promotedAccountPaths,
+  }) => PdaProgramExpressionEmitter(
+    _literals,
+  ).emit(seed, instruction, leaves, promotedAccountPaths: promotedAccountPaths);
+
+  void _requirePromoted(
+    AccountLeaf account,
+    Set<String> promotedAccountPaths,
+    String seedPath,
+  ) {
+    if (!promotedAccountPaths.contains(account.wirePath)) {
+      throw StateError('PDA account dependency is not promoted: $seedPath.');
+    }
+  }
 }

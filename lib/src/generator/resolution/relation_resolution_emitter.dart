@@ -38,7 +38,7 @@ final class RelationResolutionEmitter extends SectionEmitter {
         ..writeln('$indent        resolvedAccounts: {');
       for (final candidate in leaves) {
         out.writeln(
-          "$indent          if (${member(candidate.path)} != null) '${escape(candidate.wirePath)}': ${member(candidate.path)}!,",
+          "$indent          if (${member(candidate.path)} != null) '${escape(candidate.wirePath)}': ${member(candidate.path)},",
         );
       }
       out

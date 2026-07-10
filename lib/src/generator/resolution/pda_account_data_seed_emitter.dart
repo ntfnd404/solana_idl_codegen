@@ -22,8 +22,9 @@ final class PdaAccountDataSeedEmitter {
     IdlPathSeed seed,
     AccountLeaf sourceAccount,
     int index,
-    String indent,
-  ) {
+    String indent, {
+    required String promotedAddress,
+  }) {
     final path = seed.path;
     final accountType = seed.account;
     final definition = accountType == null
@@ -36,15 +37,12 @@ final class PdaAccountDataSeedEmitter {
     final isLocalAccount = context.program.accounts.any(
       (account) => account.name == accountType,
     );
-    final address = literals.member(sourceAccount.path);
+    final address = promotedAddress;
     final snapshot = 'seedSnapshot$index';
     out
       ..writeln('${indent}final seedReader$index = context.accountReader;')
       ..writeln(
         "${indent}if (seedReader$index == null) throw ${literals.type('pda_exception')}(code: 'PDA_ACCOUNT_READER_REQUIRED', message: 'AccountReader is required for account-data PDA seeds.', seedIndex: $index);",
-      )
-      ..writeln(
-        "${indent}if ($address == null) throw ${literals.type('pda_exception')}(code: 'PDA_SOURCE_UNRESOLVED', message: 'PDA seed source account is unresolved.', seedIndex: $index);",
       )
       ..writeln(
         '$indent final $snapshot = await (seedAccountCache[$address] ??= seedReader$index.readAccount($address, options: context.readOptions));',

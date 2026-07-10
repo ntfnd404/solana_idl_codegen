@@ -79,10 +79,14 @@ final class DartTypeMapping {
   };
 
   /// Builds Borsh write statements for [value] from [expression].
-  String write(
+  String write(IdlType value, String writer, String expression) =>
+      _write(value, writer, expression, 0);
+
+  String _write(
     IdlType value,
     String writer,
     String expression,
+    int depth,
   ) => switch (value) {
     IdlPrimitiveType(:final name) => switch (name) {
       'bool' => '$writer.writeBool($expression);',
@@ -107,22 +111,27 @@ final class DartTypeMapping {
       _ => throw StateError('Unsupported primitive $name.'),
     },
     IdlOptionType(:final inner) =>
-      'if ($expression == null) { $writer.writeUnsigned(BigInt.zero, 1); } '
-          'else { $writer.writeUnsigned(BigInt.one, 1); ${write(inner, writer, '$expression!')} }',
+      'switch ($expression) { '
+          'case null: $writer.writeUnsigned(BigInt.zero, 1); '
+          'case final optionValue$depth: '
+          '$writer.writeUnsigned(BigInt.one, 1); '
+          '${_write(inner, writer, 'optionValue$depth', depth + 1)} }',
     IdlCOptionType(:final inner) =>
-      'if ($expression == null) { '
-          '$writer.writeUnsigned(BigInt.zero, 4); '
-          '$writer.writeBytes(List<int>.filled(${_cOptionPayloadSize(inner)}, 0)); } '
-          'else { $writer.writeUnsigned(BigInt.one, 4); ${write(inner, writer, '$expression!')} }',
+      'switch ($expression) { '
+          'case null: $writer.writeUnsigned(BigInt.zero, 4); '
+          '$writer.writeBytes(List<int>.filled(${_cOptionPayloadSize(inner)}, 0)); '
+          'case final optionValue$depth: '
+          '$writer.writeUnsigned(BigInt.one, 4); '
+          '${_write(inner, writer, 'optionValue$depth', depth + 1)} }',
     IdlVectorType(:final inner) =>
       '$writer.writeUnsigned(BigInt.from($expression.length), 4); '
-          'for (final item in $expression) { ${write(inner, writer, 'item')} }',
+          'for (final item in $expression) { ${_write(inner, writer, 'item', depth + 1)} }',
     IdlArrayType(:final inner, :final length) =>
       'if ($expression.length != $length) throw ArgumentError.value($expression.length, "value"); '
-          'for (final item in $expression) { ${write(inner, writer, 'item')} }',
+          'for (final item in $expression) { ${_write(inner, writer, 'item', depth + 1)} }',
     IdlGenericArrayType(:final inner, :final lengthName) =>
       'if ($expression.length != ${member(lengthName)}) throw ArgumentError.value($expression.length, "value"); '
-          'for (final item in $expression) { ${write(inner, writer, 'item')} }',
+          'for (final item in $expression) { ${_write(inner, writer, 'item', depth + 1)} }',
     IdlDefinedType(:final name, :final generics, :final constGenerics) =>
       '${_codec(name, generics, constGenerics)}.write($writer, $expression);',
     IdlGenericType(:final name) =>
