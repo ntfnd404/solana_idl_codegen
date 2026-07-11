@@ -300,23 +300,23 @@ void main() {
       );
       if (layout == OutputLayout.bundled) {
         await File(
-          '${directory.path}/example_program.solana.dart',
+          '${directory.path}/example_program_solana.dart',
         ).writeAsString(output.files['program.dart']!);
       } else {
         const suffixes = {
           'program.dart': '',
-          'support.dart': '.support',
-          'types.dart': '.types',
-          'accounts.dart': '.accounts',
-          'instructions.dart': '.instructions',
-          'resolution.dart': '.resolution',
-          'events.dart': '.events',
-          'errors.dart': '.errors',
-          'client.dart': '.client',
+          'support.dart': '_support',
+          'types.dart': '_types',
+          'accounts.dart': '_accounts',
+          'instructions.dart': '_instructions',
+          'resolution.dart': '_resolution',
+          'events.dart': '_events',
+          'errors.dart': '_errors',
+          'client.dart': '_client',
         };
         for (final entry in suffixes.entries) {
           await File(
-            '${directory.path}/example_program.solana${entry.value}.dart',
+            '${directory.path}/example_program_solana${entry.value}.dart',
           ).writeAsString(
             output.files[entry.key]!.replaceAll(
               '__PROGRAM_STEM__',

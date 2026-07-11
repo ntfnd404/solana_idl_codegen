@@ -150,25 +150,25 @@ Future<void> _writeGeneratedFiles(
 ) async {
   if (layout == OutputLayout.bundled) {
     await File(
-      p.join(lib.path, '$stem.solana.dart'),
+      p.join(lib.path, '${stem}_solana.dart'),
     ).writeAsString(output.files['program.dart']!);
     return;
   }
 
   const suffixes = {
     'program.dart': '',
-    'support.dart': '.support',
-    'types.dart': '.types',
-    'accounts.dart': '.accounts',
-    'instructions.dart': '.instructions',
-    'resolution.dart': '.resolution',
-    'events.dart': '.events',
-    'errors.dart': '.errors',
-    'client.dart': '.client',
+    'support.dart': '_support',
+    'types.dart': '_types',
+    'accounts.dart': '_accounts',
+    'instructions.dart': '_instructions',
+    'resolution.dart': '_resolution',
+    'events.dart': '_events',
+    'errors.dart': '_errors',
+    'client.dart': '_client',
   };
   for (final entry in suffixes.entries) {
     await File(
-      p.join(lib.path, '$stem.solana${entry.value}.dart'),
+      p.join(lib.path, '${stem}_solana${entry.value}.dart'),
     ).writeAsString(
       output.files[entry.key]!.replaceAll('__PROGRAM_STEM__', stem),
     );
@@ -292,8 +292,8 @@ bool _isPrivate(String name) => name.startsWith('_');
 
 String _consumerMain(OutputLayout layout, {required bool includeSecondary}) =>
     '''
-import 'package:generated_sdk_consumer_${layout.name}/generated/example_program.solana.dart';
-${includeSecondary ? "import 'package:generated_sdk_consumer_${layout.name}/generated/secondary_program.solana.dart';" : ''}
+import 'package:generated_sdk_consumer_${layout.name}/generated/example_program_solana.dart';
+${includeSecondary ? "import 'package:generated_sdk_consumer_${layout.name}/generated/secondary_program_solana.dart';" : ''}
 
 void main() {
   final zero = ExampleProgramAddress.fromBytes(List<int>.filled(32, 0));

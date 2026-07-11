@@ -9,12 +9,12 @@
 /// Generated client facades for `secondary_program`.
 library;
 
-import 'secondary_program.solana.accounts.dart';
-import 'secondary_program.solana.events.dart';
-import 'secondary_program.solana.instructions.dart';
-import 'secondary_program.solana.resolution.dart';
-import 'secondary_program.solana.support.dart';
-import 'secondary_program.solana.types.dart';
+import 'secondary_program_solana_accounts.dart';
+import 'secondary_program_solana_events.dart';
+import 'secondary_program_solana_instructions.dart';
+import 'secondary_program_solana_resolution.dart';
+import 'secondary_program_solana_support.dart';
+import 'secondary_program_solana_types.dart';
 
 /// Instruction construction facade.
 final class SecondaryProgramInstructionsClient {

@@ -9,11 +9,11 @@
 /// Generated public API for `secondary_program`.
 library;
 
-export 'secondary_program.solana.support.dart';
-export 'secondary_program.solana.types.dart';
-export 'secondary_program.solana.accounts.dart';
-export 'secondary_program.solana.instructions.dart';
-export 'secondary_program.solana.resolution.dart';
-export 'secondary_program.solana.events.dart';
-export 'secondary_program.solana.errors.dart';
-export 'secondary_program.solana.client.dart';
+export 'secondary_program_solana_accounts.dart';
+export 'secondary_program_solana_client.dart';
+export 'secondary_program_solana_errors.dart';
+export 'secondary_program_solana_events.dart';
+export 'secondary_program_solana_instructions.dart';
+export 'secondary_program_solana_resolution.dart';
+export 'secondary_program_solana_support.dart';
+export 'secondary_program_solana_types.dart';

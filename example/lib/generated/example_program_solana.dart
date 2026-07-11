@@ -9,11 +9,11 @@
 /// Generated public API for `example_program`.
 library;
 
-export 'example_program.solana.support.dart';
-export 'example_program.solana.types.dart';
-export 'example_program.solana.accounts.dart';
-export 'example_program.solana.instructions.dart';
-export 'example_program.solana.resolution.dart';
-export 'example_program.solana.events.dart';
-export 'example_program.solana.errors.dart';
-export 'example_program.solana.client.dart';
+export 'example_program_solana_accounts.dart';
+export 'example_program_solana_client.dart';
+export 'example_program_solana_errors.dart';
+export 'example_program_solana_events.dart';
+export 'example_program_solana_instructions.dart';
+export 'example_program_solana_resolution.dart';
+export 'example_program_solana_support.dart';
+export 'example_program_solana_types.dart';

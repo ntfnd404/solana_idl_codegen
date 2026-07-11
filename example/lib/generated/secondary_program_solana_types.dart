@@ -10,7 +10,7 @@
 library;
 
 import 'dart:typed_data';
-import 'secondary_program.solana.support.dart';
+import 'secondary_program_solana_support.dart';
 
 bool _programListEquals<T>(
   List<T> left,

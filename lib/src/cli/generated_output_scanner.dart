@@ -7,6 +7,16 @@ import 'package:path/path.dart' as path;
 const generatedFileMarker = '// tool: solana_idl_codegen';
 
 const _knownSuffixes = <String>[
+  '_solana.dart',
+  '_solana_support.dart',
+  '_solana_types.dart',
+  '_solana_accounts.dart',
+  '_solana_instructions.dart',
+  '_solana_resolution.dart',
+  '_solana_events.dart',
+  '_solana_errors.dart',
+  '_solana_client.dart',
+  // Legacy dotted names remain recognized so regeneration removes them.
   '.solana.dart',
   '.solana.support.dart',
   '.solana.types.dart',

@@ -9,8 +9,8 @@
 /// Generated account API for `example_program`.
 library;
 
-import 'example_program.solana.support.dart';
-import 'example_program.solana.types.dart';
+import 'example_program_solana_support.dart';
+import 'example_program_solana_types.dart';
 
 /// Decoder and discriminator metadata for `ExampleProgramMessage` accounts.
 abstract final class ExampleProgramMessageAccount {

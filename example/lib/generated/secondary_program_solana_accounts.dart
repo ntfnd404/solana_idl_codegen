@@ -9,8 +9,8 @@
 /// Generated account API for `secondary_program`.
 library;
 
-import 'secondary_program.solana.support.dart';
-import 'secondary_program.solana.types.dart';
+import 'secondary_program_solana_support.dart';
+import 'secondary_program_solana_types.dart';
 
 /// Program-level registry of generated account metadata.
 abstract final class SecondaryProgramAccountRegistry {

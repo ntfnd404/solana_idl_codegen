@@ -9,12 +9,12 @@
 /// Generated client facades for `example_program`.
 library;
 
-import 'example_program.solana.accounts.dart';
-import 'example_program.solana.events.dart';
-import 'example_program.solana.instructions.dart';
-import 'example_program.solana.resolution.dart';
-import 'example_program.solana.support.dart';
-import 'example_program.solana.types.dart';
+import 'example_program_solana_accounts.dart';
+import 'example_program_solana_events.dart';
+import 'example_program_solana_instructions.dart';
+import 'example_program_solana_resolution.dart';
+import 'example_program_solana_support.dart';
+import 'example_program_solana_types.dart';
 
 /// Instruction construction facade.
 final class ExampleProgramInstructionsClient {

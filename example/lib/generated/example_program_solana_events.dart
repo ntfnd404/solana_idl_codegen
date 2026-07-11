@@ -1,30 +1,51 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND.
 // tool: solana_idl_codegen
 // generator-version: 0.1.0
-// source-sha256: bfba19c124c33b827b5c139cc62b583f9c36aafb5951f72e02387a67705816a7
-// semantic-ir-sha256: 116502c850c55b1b16510193442452e33c2161adb8e40f36a00d8c66826e6b0a
+// source-sha256: 2865113b5e9095b7a15ecca890930530f1875b9cd72df2cd2c81ac066ae07d80
+// semantic-ir-sha256: 5a434b479f377019592da21c1dd21985819054fa8f3ddcca8908f25645f95fef
 // SPDX-License-Identifier: MIT
 // ignore_for_file: curly_braces_in_flow_control_structures, empty_constructor_bodies, prefer_initializing_formals, unused_element, unused_import, use_super_parameters
 
-/// Generated event API for `secondary_program`.
+/// Generated event API for `example_program`.
 library;
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'secondary_program.solana.support.dart';
-import 'secondary_program.solana.types.dart';
+import 'example_program_solana_support.dart';
+import 'example_program_solana_types.dart';
 
 /// Base class for decoded program events.
-sealed class SecondaryProgramEvent {
+sealed class ExampleProgramEvent {
   /// Creates a decoded event wrapper.
-  const SecondaryProgramEvent();
+  const ExampleProgramEvent();
+}
+
+/// Decoded `MessageCreated` event.
+final class ExampleProgramMessageCreatedEvent extends ExampleProgramEvent {
+  /// Creates an event wrapper.
+  const ExampleProgramMessageCreatedEvent(this.value);
+
+  /// Typed event payload.
+  final ExampleProgramMessageCreated value;
+
+  /// IDL event discriminator.
+  static final List<int> discriminator = List.unmodifiable(<int>[
+    77,
+    101,
+    115,
+    115,
+    97,
+    103,
+    101,
+    2,
+  ]);
 }
 
 /// Context attached to every decoded event notification.
-final class SecondaryProgramEventContext {
+final class ExampleProgramEventContext {
   /// Creates event context.
-  const SecondaryProgramEventContext({
+  const ExampleProgramEventContext({
     required this.signature,
     required this.slot,
   });
@@ -37,32 +58,32 @@ final class SecondaryProgramEventContext {
 }
 
 /// One typed event notification or recoverable log diagnostic.
-sealed class SecondaryProgramEventNotification {
+sealed class ExampleProgramEventNotification {
   /// Creates a notification.
-  const SecondaryProgramEventNotification();
+  const ExampleProgramEventNotification();
 }
 
 /// Successfully decoded event notification.
-final class SecondaryProgramDecodedEventNotification
-    extends SecondaryProgramEventNotification {
+final class ExampleProgramDecodedEventNotification
+    extends ExampleProgramEventNotification {
   /// Creates a decoded notification.
-  const SecondaryProgramDecodedEventNotification({
+  const ExampleProgramDecodedEventNotification({
     required this.event,
     required this.context,
   });
 
   /// Typed event.
-  final SecondaryProgramEvent event;
+  final ExampleProgramEvent event;
 
   /// Transaction context.
-  final SecondaryProgramEventContext context;
+  final ExampleProgramEventContext context;
 }
 
 /// Recoverable malformed or truncated log notification.
-final class SecondaryProgramEventDiagnosticNotification
-    extends SecondaryProgramEventNotification {
+final class ExampleProgramEventDiagnosticNotification
+    extends ExampleProgramEventNotification {
   /// Creates a diagnostic notification.
-  const SecondaryProgramEventDiagnosticNotification({
+  const ExampleProgramEventDiagnosticNotification({
     required this.code,
     required this.message,
   });
@@ -75,16 +96,16 @@ final class SecondaryProgramEventDiagnosticNotification
 }
 
 /// Closeable typed event subscription.
-final class SecondaryProgramTypedEventSubscription {
+final class ExampleProgramTypedEventSubscription {
   /// Creates a typed wrapper around a raw subscription.
-  SecondaryProgramTypedEventSubscription._(this._raw, this.notifications);
+  ExampleProgramTypedEventSubscription._(this._raw, this.notifications);
 
-  final SecondaryProgramEventSubscription _raw;
+  final ExampleProgramEventSubscription _raw;
 
   bool _closed = false;
 
   /// Typed events and recoverable malformed-log diagnostics.
-  final Stream<SecondaryProgramEventNotification> notifications;
+  final Stream<ExampleProgramEventNotification> notifications;
 
   /// Closes the raw subscription exactly once.
   Future<void> close() async {
@@ -95,28 +116,28 @@ final class SecondaryProgramTypedEventSubscription {
 }
 
 /// Typed event subscription client with invocation-stack parsing.
-final class SecondaryProgramEventsClient {
+final class ExampleProgramEventsClient {
   /// Creates an event client.
-  const SecondaryProgramEventsClient(this.subscriber);
+  const ExampleProgramEventsClient(this.subscriber);
 
   /// Raw log subscription capability.
-  final SecondaryProgramEventSubscriber subscriber;
+  final ExampleProgramEventSubscriber subscriber;
 
   /// Subscribes and decodes events without closing on malformed logs.
-  Future<SecondaryProgramTypedEventSubscription> subscribe() async {
+  Future<ExampleProgramTypedEventSubscription> subscribe() async {
     final subscription = await subscriber.subscribe(
-      SecondaryProgramProgram.programAddress,
+      ExampleProgramProgram.programAddress,
     );
-    return SecondaryProgramTypedEventSubscription._(
+    return ExampleProgramTypedEventSubscription._(
       subscription,
       subscription.batches.asyncExpand(_decodeBatch),
     );
   }
 
-  Stream<SecondaryProgramEventNotification> _decodeBatch(
-    SecondaryProgramLogBatch batch,
+  Stream<ExampleProgramEventNotification> _decodeBatch(
+    ExampleProgramLogBatch batch,
   ) async* {
-    final target = SecondaryProgramProgram.address;
+    final target = ExampleProgramProgram.address;
     final stack = <String>[];
     for (final line in batch.logs) {
       final invoke = RegExp(
@@ -131,7 +152,7 @@ final class SecondaryProgramEventsClient {
       ).firstMatch(line);
       if (exit != null) {
         if (stack.isEmpty || stack.last != exit.group(1)) {
-          yield const SecondaryProgramEventDiagnosticNotification(
+          yield const ExampleProgramEventDiagnosticNotification(
             code: 'EVENT_STACK_MISMATCH',
             message: 'Program invocation stack is malformed.',
           );
@@ -149,7 +170,7 @@ final class SecondaryProgramEventsClient {
       try {
         payload = base64Decode(line.substring(14));
       } on FormatException {
-        yield const SecondaryProgramEventDiagnosticNotification(
+        yield const ExampleProgramEventDiagnosticNotification(
           code: 'EVENT_BASE64',
           message: 'Event payload is not valid Base64.',
         );
@@ -157,14 +178,14 @@ final class SecondaryProgramEventsClient {
       }
       final decoded = _decode(payload);
       if (decoded == null) {
-        yield const SecondaryProgramEventDiagnosticNotification(
+        yield const ExampleProgramEventDiagnosticNotification(
           code: 'EVENT_DISCRIMINATOR',
           message: 'Unknown or truncated event discriminator.',
         );
       } else {
-        yield SecondaryProgramDecodedEventNotification(
+        yield ExampleProgramDecodedEventNotification(
           event: decoded,
-          context: SecondaryProgramEventContext(
+          context: ExampleProgramEventContext(
             signature: batch.signature,
             slot: batch.slot,
           ),
@@ -173,7 +194,14 @@ final class SecondaryProgramEventsClient {
     }
   }
 
-  SecondaryProgramEvent? _decode(Uint8List data) {
+  ExampleProgramEvent? _decode(Uint8List data) {
+    if (_startsWith(data, ExampleProgramMessageCreatedEvent.discriminator)) {
+      return ExampleProgramMessageCreatedEvent(
+        ExampleProgramMessageCreated.codec.decodeExact(
+          data.sublist(ExampleProgramMessageCreatedEvent.discriminator.length),
+        ),
+      );
+    }
     return null;
   }
 

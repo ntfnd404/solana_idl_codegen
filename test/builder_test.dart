@@ -35,7 +35,7 @@ void main() {
       {'app|lib/idl/sample.json': _idl},
       rootPackage: 'app',
       outputs: {
-        'app|lib/generated/sample.solana.dart': decodedMatches(
+        'app|lib/generated/sample_solana.dart': decodedMatches(
           allOf(
             contains('// tool: solana_idl_codegen'),
             contains('class SampleAddress'),
@@ -52,19 +52,19 @@ void main() {
       {'app|lib/idl/nested/sample.json': _idl},
       rootPackage: 'app',
       outputs: {
-        'app|lib/generated/nested/sample.solana.dart': decodedMatches(
-          contains("export 'sample.solana.support.dart';"),
+        'app|lib/generated/nested/sample_solana.dart': decodedMatches(
+          contains("export 'sample_solana_support.dart';"),
         ),
-        'app|lib/generated/nested/sample.solana.support.dart': decodedMatches(
+        'app|lib/generated/nested/sample_solana_support.dart': decodedMatches(
           contains('class ApiAddress'),
         ),
-        'app|lib/generated/nested/sample.solana.types.dart': anything,
-        'app|lib/generated/nested/sample.solana.accounts.dart': anything,
-        'app|lib/generated/nested/sample.solana.instructions.dart': anything,
-        'app|lib/generated/nested/sample.solana.resolution.dart': anything,
-        'app|lib/generated/nested/sample.solana.events.dart': anything,
-        'app|lib/generated/nested/sample.solana.errors.dart': anything,
-        'app|lib/generated/nested/sample.solana.client.dart': anything,
+        'app|lib/generated/nested/sample_solana_types.dart': anything,
+        'app|lib/generated/nested/sample_solana_accounts.dart': anything,
+        'app|lib/generated/nested/sample_solana_instructions.dart': anything,
+        'app|lib/generated/nested/sample_solana_resolution.dart': anything,
+        'app|lib/generated/nested/sample_solana_events.dart': anything,
+        'app|lib/generated/nested/sample_solana_errors.dart': anything,
+        'app|lib/generated/nested/sample_solana_client.dart': anything,
       },
     );
   });

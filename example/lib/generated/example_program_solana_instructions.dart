@@ -10,8 +10,8 @@
 library;
 
 import 'dart:typed_data';
-import 'example_program.solana.support.dart';
-import 'example_program.solana.types.dart';
+import 'example_program_solana_support.dart';
+import 'example_program_solana_types.dart';
 
 /// Immutable arguments for `create_message`.
 /// Creates a message account and returns its numeric identifier.

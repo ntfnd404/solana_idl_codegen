@@ -22,6 +22,11 @@ void main() {
     final foreign = File('${output.path}/foreign.dart');
     output.createSync();
     foreign.writeAsStringSync('// handwritten\n');
+    final legacy = File('${output.path}/program.solana.types.dart')
+      ..writeAsStringSync(
+        '// GENERATED CODE - DO NOT MODIFY BY HAND.\n'
+        '// tool: solana_idl_codegen\n',
+      );
     final log = File('${directory.path}/log').openWrite();
     final arguments = [
       'generate',
@@ -34,11 +39,12 @@ void main() {
       'modular',
     ];
     expect(await runCli(arguments, stdoutSink: log, stderrSink: log), 0);
+    expect(await legacy.exists(), isFalse);
     expect(
       await runCli([...arguments, '--check'], stdoutSink: log, stderrSink: log),
       0,
     );
-    final generated = File('${output.path}/program.solana.types.dart');
+    final generated = File('${output.path}/program_solana_types.dart');
     await generated.writeAsString('// drift\n');
     expect(
       await runCli([...arguments, '--check'], stdoutSink: log, stderrSink: log),
@@ -86,16 +92,16 @@ void main() {
 
       expect(await runCli(generate('first', 'modular'), stdoutSink: log), 0);
       expect(await runCli(generate('second', 'modular'), stdoutSink: log), 0);
-      final secondTypes = File('${output.path}/second.solana.types.dart');
+      final secondTypes = File('${output.path}/second_solana_types.dart');
       expect(await secondTypes.exists(), isTrue);
 
       expect(await runCli(generate('first', 'bundled'), stdoutSink: log), 0);
       expect(await secondTypes.exists(), isTrue);
       expect(
-        await File('${output.path}/first.solana.types.dart').exists(),
+        await File('${output.path}/first_solana_types.dart').exists(),
         isFalse,
       );
-      expect(await File('${output.path}/first.solana.dart').exists(), isTrue);
+      expect(await File('${output.path}/first_solana.dart').exists(), isTrue);
       await log.close();
     },
   );
@@ -122,7 +128,7 @@ void main() {
     addTearDown(() => directory.delete(recursive: true));
     final canonical = await directory.resolveSymbolicLinks();
     const token = '123_456';
-    final target = File('$canonical/program.solana.dart');
+    final target = File('$canonical/program_solana.dart');
     final backup = File('${target.path}.solana-idl-backup-$token');
     const original = '// tool: solana_idl_codegen\n// original\n';
     await target.writeAsString(original);
@@ -171,7 +177,7 @@ void main() {
             'phase': 'installed',
             'entries': [
               {
-                'target': '${directory.parent.path}/outside.solana.dart',
+                'target': '${directory.parent.path}/outside_solana.dart',
                 'staged': null,
                 'backup': '${directory.parent.path}/outside.backup',
                 'install': false,
@@ -200,8 +206,8 @@ void main() {
       final directory = await Directory.systemTemp.createTemp('idl_cli_phase_');
       addTearDown(() => directory.delete(recursive: true));
       final canonical = await directory.resolveSymbolicLinks();
-      final existing = File('$canonical/existing.solana.dart');
-      final added = File('$canonical/added.solana.dart');
+      final existing = File('$canonical/existing_solana.dart');
+      final added = File('$canonical/added_solana.dart');
       const original = '// tool: solana_idl_codegen\n// original\n';
       const replacement = '// tool: solana_idl_codegen\n// replacement\n';
       await existing.writeAsString(original);
@@ -250,7 +256,7 @@ void main() {
       'run',
       'test/helpers/lock_writer.dart',
       output.path,
-      '$canonical/first.solana.dart',
+      '$canonical/first_solana.dart',
       firstReached.path,
       release.path,
     ], workingDirectory: Directory.current.path);
@@ -261,7 +267,7 @@ void main() {
       'run',
       'test/helpers/lock_writer.dart',
       alias.path,
-      '$canonical/second.solana.dart',
+      '$canonical/second_solana.dart',
       secondReached.path,
       '-',
     ], workingDirectory: Directory.current.path);

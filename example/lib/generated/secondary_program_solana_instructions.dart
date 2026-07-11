@@ -10,8 +10,8 @@
 library;
 
 import 'dart:typed_data';
-import 'secondary_program.solana.support.dart';
-import 'secondary_program.solana.types.dart';
+import 'secondary_program_solana_support.dart';
+import 'secondary_program_solana_types.dart';
 
 /// Immutable arguments for `consume`.
 final class SecondaryProgramConsumeArgs {

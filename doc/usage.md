@@ -34,7 +34,7 @@ Use exactly one builder for the same input files.
 Bundled is the simplest option. It generates one Dart file per IDL:
 
 ```text
-lib/generated/my_program.solana.dart
+lib/generated/my_program_solana.dart
 ```
 
 `build.yaml`:
@@ -58,15 +58,15 @@ Modular generates a barrel file plus focused files for support, models,
 instructions, accounts, resolution, events, errors, and clients:
 
 ```text
-lib/generated/my_program.solana.dart
-lib/generated/my_program.solana.support.dart
-lib/generated/my_program.solana.types.dart
-lib/generated/my_program.solana.accounts.dart
-lib/generated/my_program.solana.instructions.dart
-lib/generated/my_program.solana.resolution.dart
-lib/generated/my_program.solana.events.dart
-lib/generated/my_program.solana.errors.dart
-lib/generated/my_program.solana.client.dart
+lib/generated/my_program_solana.dart
+lib/generated/my_program_solana_support.dart
+lib/generated/my_program_solana_types.dart
+lib/generated/my_program_solana_accounts.dart
+lib/generated/my_program_solana_instructions.dart
+lib/generated/my_program_solana_resolution.dart
+lib/generated/my_program_solana_events.dart
+lib/generated/my_program_solana_errors.dart
+lib/generated/my_program_solana_client.dart
 ```
 
 `build.yaml`:
@@ -192,7 +192,7 @@ CLI exit codes:
 Bundled and modular layouts both expose the same barrel import:
 
 ```dart
-import 'package:my_app/generated/my_program.solana.dart';
+import 'package:my_app/generated/my_program_solana.dart';
 ```
 
 Generated public names use the program prefix:

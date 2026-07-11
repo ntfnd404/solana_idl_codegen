@@ -11,10 +11,10 @@ library;
 
 import 'dart:convert';
 import 'dart:typed_data';
-import 'secondary_program.solana.accounts.dart';
-import 'secondary_program.solana.instructions.dart';
-import 'secondary_program.solana.support.dart';
-import 'secondary_program.solana.types.dart';
+import 'secondary_program_solana_accounts.dart';
+import 'secondary_program_solana_instructions.dart';
+import 'secondary_program_solana_support.dart';
+import 'secondary_program_solana_types.dart';
 
 /// Tri-state override for one instruction account.
 sealed class SecondaryProgramAccountOverride {

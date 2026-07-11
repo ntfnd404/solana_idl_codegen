@@ -1,7 +1,7 @@
 import 'package:solana/dto.dart';
 import 'package:solana/solana.dart';
 
-import 'generated/example_program.solana.dart';
+import 'generated/example_program_solana.dart';
 
 /// Optional application-owned adapter from `package:solana` to the generated
 /// account-reader port.

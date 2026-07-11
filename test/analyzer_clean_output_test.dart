@@ -77,21 +77,21 @@ Future<List<String>> _writeGenerated(
   if (layout == OutputLayout.bundled) {
     final source = output.files['program.dart']!;
     await File(
-      p.join(lib.path, 'analyzer_matrix.solana.dart'),
+      p.join(lib.path, 'analyzer_matrix_solana.dart'),
     ).writeAsString(source);
     return [source];
   }
 
   const suffixes = {
     'program.dart': '',
-    'support.dart': '.support',
-    'types.dart': '.types',
-    'accounts.dart': '.accounts',
-    'instructions.dart': '.instructions',
-    'resolution.dart': '.resolution',
-    'events.dart': '.events',
-    'errors.dart': '.errors',
-    'client.dart': '.client',
+    'support.dart': '_support',
+    'types.dart': '_types',
+    'accounts.dart': '_accounts',
+    'instructions.dart': '_instructions',
+    'resolution.dart': '_resolution',
+    'events.dart': '_events',
+    'errors.dart': '_errors',
+    'client.dart': '_client',
   };
   final sources = <String>[];
   for (final entry in suffixes.entries) {
@@ -101,7 +101,7 @@ Future<List<String>> _writeGenerated(
     );
     sources.add(source);
     await File(
-      p.join(lib.path, 'analyzer_matrix.solana${entry.value}.dart'),
+      p.join(lib.path, 'analyzer_matrix_solana${entry.value}.dart'),
     ).writeAsString(source);
   }
   return sources;

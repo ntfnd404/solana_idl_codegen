@@ -4,7 +4,7 @@ builders:
     builder_factories: ["solanaIdlBundledBuilder"]
     build_extensions:
       "lib/idl/{{}}.json":
-        - "lib/generated/{{}}.solana.dart"
+        - "lib/generated/{{}}_solana.dart"
     auto_apply: none
     build_to: source
     defaults:
@@ -19,15 +19,15 @@ builders:
     builder_factories: ["solanaIdlModularBuilder"]
     build_extensions:
       "lib/idl/{{}}.json":
-        - "lib/generated/{{}}.solana.dart"
-        - "lib/generated/{{}}.solana.support.dart"
-        - "lib/generated/{{}}.solana.types.dart"
-        - "lib/generated/{{}}.solana.accounts.dart"
-        - "lib/generated/{{}}.solana.instructions.dart"
-        - "lib/generated/{{}}.solana.resolution.dart"
-        - "lib/generated/{{}}.solana.events.dart"
-        - "lib/generated/{{}}.solana.errors.dart"
-        - "lib/generated/{{}}.solana.client.dart"
+        - "lib/generated/{{}}_solana.dart"
+        - "lib/generated/{{}}_solana_support.dart"
+        - "lib/generated/{{}}_solana_types.dart"
+        - "lib/generated/{{}}_solana_accounts.dart"
+        - "lib/generated/{{}}_solana_instructions.dart"
+        - "lib/generated/{{}}_solana_resolution.dart"
+        - "lib/generated/{{}}_solana_events.dart"
+        - "lib/generated/{{}}_solana_errors.dart"
+        - "lib/generated/{{}}_solana_client.dart"
     auto_apply: none
     build_to: source
     defaults:

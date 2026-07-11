@@ -19,5 +19,8 @@ Initial release.
   Borsh/runtime, and reference-vector tests.
 - Added publication metadata, documentation, security policy, and release
   checklist.
+- Changed generated filenames to Dart-style lower snake case, such as
+  `my_program_solana_accounts.dart`; CLI regeneration removes owned legacy
+  dotted filenames.
 - Enabled strict casts, inference, and raw-type analysis, and removed raw
   `Map`/`List` checks from JSON decoding boundaries.

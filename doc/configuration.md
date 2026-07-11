@@ -12,7 +12,7 @@ represent YAML nesting.
 
 | Key | Layout | Outputs |
 | --- | --- | --- |
-| `solana_idl_codegen:bundled` | Bundled | One `.solana.dart` SDK |
+| `solana_idl_codegen:bundled` | Bundled | One `_solana.dart` SDK |
 | `solana_idl_codegen:modular` | Modular | Barrel plus eight focused libraries |
 
 Both builders are opt-in (`auto_apply: none`) and select

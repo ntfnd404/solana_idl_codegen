@@ -54,7 +54,7 @@ Put IDLs under `lib/idl/` and enable exactly one builder.
 4. Import the generated SDK:
 
    ```dart
-   import 'generated/my_program.solana.dart';
+   import 'generated/my_program_solana.dart';
    ```
 
 5. Build an instruction and hand its wire record to your application-owned
@@ -89,7 +89,7 @@ The colon is part of the key; it is not YAML nesting.
 
 | Key | Use when | Output |
 | --- | --- | --- |
-| `solana_idl_codegen:bundled` | You want the simplest setup | `lib/generated/<idl>.solana.dart` |
+| `solana_idl_codegen:bundled` | You want the simplest setup | `lib/generated/<idl>_solana.dart` |
 | `solana_idl_codegen:modular` | You want smaller focused libraries | Barrel plus support/types/accounts/instructions/resolution/events/errors/client files |
 
 Package-specific options:
@@ -112,7 +112,7 @@ barrel output, so enabling both for the same IDL is an output conflict.
 ### Bundled layout
 
 Bundled is the recommended simple layout. It writes one
-`lib/generated/<path>.solana.dart` SDK per IDL.
+`lib/generated/<path>_solana.dart` SDK per IDL.
 
 ```yaml
 targets:

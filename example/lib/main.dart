@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import 'generated/example_program.solana.dart';
-import 'generated/secondary_program.solana.dart';
+import 'generated/example_program_solana.dart';
+import 'generated/secondary_program_solana.dart';
 
 void main() => runApp(const GeneratorExampleApp());
 

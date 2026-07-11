@@ -20,18 +20,18 @@ final class CliOutputPlanner {
   ) {
     final base = path.join(outputRoot, relativeStem);
     if (layout == OutputLayout.bundled) {
-      return {'$base.solana.dart': generated.files['program.dart']!};
+      return {'${base}_solana.dart': generated.files['program.dart']!};
     }
     const suffixes = {
-      'program.dart': '.solana.dart',
-      'support.dart': '.solana.support.dart',
-      'types.dart': '.solana.types.dart',
-      'accounts.dart': '.solana.accounts.dart',
-      'instructions.dart': '.solana.instructions.dart',
-      'resolution.dart': '.solana.resolution.dart',
-      'events.dart': '.solana.events.dart',
-      'errors.dart': '.solana.errors.dart',
-      'client.dart': '.solana.client.dart',
+      'program.dart': '_solana.dart',
+      'support.dart': '_solana_support.dart',
+      'types.dart': '_solana_types.dart',
+      'accounts.dart': '_solana_accounts.dart',
+      'instructions.dart': '_solana_instructions.dart',
+      'resolution.dart': '_solana_resolution.dart',
+      'events.dart': '_solana_events.dart',
+      'errors.dart': '_solana_errors.dart',
+      'client.dart': '_solana_client.dart',
     };
     return {
       for (final entry in suffixes.entries)

@@ -9,7 +9,7 @@
 /// Generated program errors for `example_program`.
 library;
 
-import 'example_program.solana.support.dart';
+import 'example_program_solana_support.dart';
 
 /// Origin reported by Anchor error logs.
 sealed class ExampleProgramErrorOrigin {

@@ -26,17 +26,17 @@ final class AnchorIdlBuilder implements Builder {
   });
 
   static const _inputPattern = r'lib/idl/{{}}.json';
-  static const _bundledOutputs = <String>[r'lib/generated/{{}}.solana.dart'];
+  static const _bundledOutputs = <String>[r'lib/generated/{{}}_solana.dart'];
   static const _modularOutputs = <String>[
-    r'lib/generated/{{}}.solana.dart',
-    r'lib/generated/{{}}.solana.support.dart',
-    r'lib/generated/{{}}.solana.types.dart',
-    r'lib/generated/{{}}.solana.accounts.dart',
-    r'lib/generated/{{}}.solana.instructions.dart',
-    r'lib/generated/{{}}.solana.resolution.dart',
-    r'lib/generated/{{}}.solana.events.dart',
-    r'lib/generated/{{}}.solana.errors.dart',
-    r'lib/generated/{{}}.solana.client.dart',
+    r'lib/generated/{{}}_solana.dart',
+    r'lib/generated/{{}}_solana_support.dart',
+    r'lib/generated/{{}}_solana_types.dart',
+    r'lib/generated/{{}}_solana_accounts.dart',
+    r'lib/generated/{{}}_solana_instructions.dart',
+    r'lib/generated/{{}}_solana_resolution.dart',
+    r'lib/generated/{{}}_solana_events.dart',
+    r'lib/generated/{{}}_solana_errors.dart',
+    r'lib/generated/{{}}_solana_client.dart',
   ];
 
   /// Physical layout declared by this builder key.
@@ -66,17 +66,17 @@ final class AnchorIdlBuilder implements Builder {
     final outputStem = path.withoutExtension(relative);
     final sourceStem = path.basename(outputStem);
     final mapping = layout == OutputLayout.bundled
-        ? const {'.solana.dart': 'program.dart'}
+        ? const {'_solana.dart': 'program.dart'}
         : const {
-            '.solana.dart': 'program.dart',
-            '.solana.support.dart': 'support.dart',
-            '.solana.types.dart': 'types.dart',
-            '.solana.accounts.dart': 'accounts.dart',
-            '.solana.instructions.dart': 'instructions.dart',
-            '.solana.resolution.dart': 'resolution.dart',
-            '.solana.events.dart': 'events.dart',
-            '.solana.errors.dart': 'errors.dart',
-            '.solana.client.dart': 'client.dart',
+            '_solana.dart': 'program.dart',
+            '_solana_support.dart': 'support.dart',
+            '_solana_types.dart': 'types.dart',
+            '_solana_accounts.dart': 'accounts.dart',
+            '_solana_instructions.dart': 'instructions.dart',
+            '_solana_resolution.dart': 'resolution.dart',
+            '_solana_events.dart': 'events.dart',
+            '_solana_errors.dart': 'errors.dart',
+            '_solana_client.dart': 'client.dart',
           };
     for (final entry in mapping.entries) {
       final content = output.files[entry.value];
