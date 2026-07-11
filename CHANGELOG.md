@@ -19,3 +19,5 @@ Initial release.
   Borsh/runtime, and reference-vector tests.
 - Added publication metadata, documentation, security policy, and release
   checklist.
+- Enabled strict casts, inference, and raw-type analysis, and removed raw
+  `Map`/`List` checks from JSON decoding boundaries.

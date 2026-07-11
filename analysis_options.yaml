@@ -5,10 +5,15 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.solana.dart"
     - "test/.generated/**"
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
 
 linter:
   rules:
     always_declare_return_types: true
+    avoid_annotating_with_dynamic: true
     avoid_dynamic_calls: true
     avoid_relative_lib_imports: true
     directives_ordering: true

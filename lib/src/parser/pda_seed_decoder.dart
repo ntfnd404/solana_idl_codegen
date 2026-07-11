@@ -56,7 +56,7 @@ final class AnchorPdaSeedDecoder {
       );
     }
     final value = object['value']!;
-    if (value is List) {
+    if (value is List<Object?>) {
       return IdlConstSeed(
         value: IdlBytesConstValue([
           for (var index = 0; index < value.length; index++)

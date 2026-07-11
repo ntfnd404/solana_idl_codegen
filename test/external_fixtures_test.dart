@@ -134,7 +134,10 @@ Map<String, Object?> _loadProvenance() {
 
 List<Map<String, Object?>> _fixtures(Map<String, Object?> provenance) =>
     (provenance['fixtures'] as List<Object?>)
-        .map((fixture) => Map<String, Object?>.from(fixture! as Map))
+        .map(
+          (fixture) =>
+              Map<String, Object?>.from(fixture! as Map<Object?, Object?>),
+        )
         .toList(growable: false);
 
 String _injectAddress(String source, String address) {

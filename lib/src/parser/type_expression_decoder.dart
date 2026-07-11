@@ -87,7 +87,7 @@ final class AnchorTypeExpressionDecoder {
         values.nonEmptyString(array[1], '$path[1]'),
       );
     }
-    if (array[1] is Map) {
+    if (array[1] is Map<Object?, Object?>) {
       final length = values.object(array[1], '$path[1]');
       values.knownKeys(length, const {'generic'}, '$path[1]');
       return IdlGenericArrayType(
@@ -116,7 +116,7 @@ final class AnchorTypeExpressionDecoder {
     for (var index = 0; index < rawGenerics.length; index++) {
       final genericPath = '$path.generics[$index]';
       final rawGeneric = rawGenerics[index];
-      if (rawGeneric is Map) {
+      if (rawGeneric is Map<Object?, Object?>) {
         final generic = values.object(rawGeneric, genericPath);
         if (generic['kind'] == 'const') {
           values.knownKeys(generic, const {'kind', 'value'}, genericPath);
@@ -140,7 +140,7 @@ final class AnchorTypeExpressionDecoder {
 
   /// Decodes a generic argument as either a type or a typed wrapper object.
   IdlType genericArgument(Object? raw, String path) {
-    if (raw is Map) {
+    if (raw is Map<Object?, Object?>) {
       final object = values.object(raw, path);
       if (object.containsKey('kind') || object.containsKey('type')) {
         values.knownKeys(object, const {'kind', 'type'}, path);

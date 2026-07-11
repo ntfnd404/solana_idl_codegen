@@ -103,7 +103,7 @@ final class AnchorTypeBodyDecoder {
   }
 
   bool _isNamedField(Object? raw) {
-    if (raw is! Map) return false;
+    if (raw is! Map<Object?, Object?>) return false;
     final object = values.object(raw, r'$');
     return object.containsKey('name') || object.containsKey('type');
   }

@@ -16,7 +16,7 @@ final class StrictJsonReader {
 
   /// Reads [value] as a string-keyed object.
   Map<String, Object?> object(Object? value, String path) {
-    if (value is! Map) {
+    if (value is! Map<Object?, Object?>) {
       throw IdlFormatException('Expected an object.', path);
     }
     final result = <String, Object?>{};
@@ -48,7 +48,7 @@ final class StrictJsonReader {
 
   /// Reads [value] as an immutable JSON array.
   List<Object?> list(Object? value, String path) {
-    if (value is! List) {
+    if (value is! List<Object?>) {
       throw IdlFormatException('Expected an array.', path);
     }
     return List<Object?>.unmodifiable(value);
