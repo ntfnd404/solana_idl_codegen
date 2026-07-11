@@ -43,20 +43,27 @@ final class InstructionArgsEmitter extends SectionEmitter {
                 instruction.arguments,
                 argument,
               );
+              final requiresTransformation = semantics
+                  .requiresImmutableTransformation(argument.type);
               builder.optionalParameters.add(
                 Parameter(
                   (builder) => builder
                     ..name = argumentName
-                    ..type = refer(_constructorType(argument.type))
+                    ..type = requiresTransformation
+                        ? refer(_constructorType(argument.type))
+                        : null
                     ..named = true
-                    ..required = true,
+                    ..required = true
+                    ..toThis = !requiresTransformation,
                 ),
               );
-              builder.initializers.add(
-                Code(
-                  '$argumentName = ${semantics.immutableExpression(argument.type, argumentName)}',
-                ),
-              );
+              if (requiresTransformation) {
+                builder.initializers.add(
+                  Code(
+                    '$argumentName = ${semantics.immutableExpression(argument.type, argumentName)}',
+                  ),
+                );
+              }
             }
           }),
         )

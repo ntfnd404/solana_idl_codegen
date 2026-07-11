@@ -7,9 +7,12 @@ final class TypeMetadataFragment extends SectionEmitter {
   /// Creates a metadata fragment for [context].
   const TypeMetadataFragment(super.context);
 
-  /// Emits list equality helper and generated program metadata.
+  /// Emits required value helpers and generated program metadata.
   @override
-  List<Spec> emit() => [_listEquals(), _programMetadata()];
+  List<Spec> emit() => [
+    if (context.features.usesStructuralListEquality) _listEquals(),
+    _programMetadata(),
+  ];
 
   Method _listEquals() => Method(
     (builder) => builder
@@ -22,9 +25,13 @@ final class TypeMetadataFragment extends SectionEmitter {
         _parameter('equals', 'bool Function(T left, T right)'),
       ])
       ..body = const Code('''
-if (left.length != right.length) return false;
+if (left.length != right.length) {
+  return false;
+}
 for (var index = 0; index < left.length; index++) {
-  if (!equals(left[index], right[index])) return false;
+  if (!equals(left[index], right[index])) {
+    return false;
+  }
 }
 return true;'''),
   );

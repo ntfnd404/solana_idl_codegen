@@ -88,38 +88,46 @@ final class DartGenerator {
       'types.dart': _library(
         context,
         'Generated value models for `${program.name}`.',
-        const ['dart:typed_data', '__PROGRAM_STEM___solana_support.dart'],
+        [
+          if (context.features.typesUseTypedData) 'dart:typed_data',
+          '__PROGRAM_STEM___solana_support.dart',
+        ],
         sections['types']!,
       ),
       'accounts.dart': _library(
         context,
         'Generated account API for `${program.name}`.',
-        const [
+        [
           '__PROGRAM_STEM___solana_support.dart',
-          '__PROGRAM_STEM___solana_types.dart',
+          if (context.features.hasAccounts)
+            '__PROGRAM_STEM___solana_types.dart',
         ],
         sections['accounts']!,
       ),
       'instructions.dart': _library(
         context,
         'Generated instruction API for `${program.name}`.',
-        const [
-          'dart:typed_data',
+        [
+          if (context.features.instructionsUseTypedData) 'dart:typed_data',
           '__PROGRAM_STEM___solana_support.dart',
-          '__PROGRAM_STEM___solana_types.dart',
+          if (context.features.hasInstructions)
+            '__PROGRAM_STEM___solana_types.dart',
         ],
         sections['instructions']!,
       ),
       'resolution.dart': _library(
         context,
         'Generated account resolution API for `${program.name}`.',
-        const [
-          'dart:convert',
-          'dart:typed_data',
-          '__PROGRAM_STEM___solana_accounts.dart',
-          '__PROGRAM_STEM___solana_instructions.dart',
+        [
+          if (context.features.resolutionUsesConvert) 'dart:convert',
+          if (context.features.hasPdaSeeds) 'dart:typed_data',
+          if (context.features.resolutionUsesAccounts)
+            '__PROGRAM_STEM___solana_accounts.dart',
+          if (context.features.hasInstructions)
+            '__PROGRAM_STEM___solana_instructions.dart',
           '__PROGRAM_STEM___solana_support.dart',
-          '__PROGRAM_STEM___solana_types.dart',
+          if (context.features.resolutionUsesTypes)
+            '__PROGRAM_STEM___solana_types.dart',
         ],
         sections['resolution']!,
       ),
@@ -144,13 +152,14 @@ final class DartGenerator {
       'client.dart': _library(
         context,
         'Generated client facades for `${program.name}`.',
-        const [
+        [
           '__PROGRAM_STEM___solana_accounts.dart',
           '__PROGRAM_STEM___solana_events.dart',
-          '__PROGRAM_STEM___solana_instructions.dart',
-          '__PROGRAM_STEM___solana_resolution.dart',
+          if (context.features.hasInstructions)
+            '__PROGRAM_STEM___solana_instructions.dart',
           '__PROGRAM_STEM___solana_support.dart',
-          '__PROGRAM_STEM___solana_types.dart',
+          if (context.features.clientUsesTypes)
+            '__PROGRAM_STEM___solana_types.dart',
         ],
         sections['client']!,
       ),

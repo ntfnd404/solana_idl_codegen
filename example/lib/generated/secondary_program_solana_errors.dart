@@ -4,8 +4,6 @@
 // source-sha256: bfba19c124c33b827b5c139cc62b583f9c36aafb5951f72e02387a67705816a7
 // semantic-ir-sha256: 116502c850c55b1b16510193442452e33c2161adb8e40f36a00d8c66826e6b0a
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated program errors for `secondary_program`.
 library;
 
@@ -103,22 +101,13 @@ final class SecondaryProgramUnknownProgramException
     extends SecondaryProgramProgramException {
   /// Creates an unknown program exception.
   SecondaryProgramUnknownProgramException({
-    required int code,
-    SecondaryProgramErrorOrigin? origin,
-    SecondaryProgramComparedValues? comparedValues,
-    List<String> rawLogs = const [],
-    String? signature,
-    SecondaryProgramTransactionFailure? failure,
-  }) : super(
-         code: code,
-         idlName: null,
-         idlMessage: null,
-         origin: origin,
-         comparedValues: comparedValues,
-         rawLogs: rawLogs,
-         signature: signature,
-         failure: failure,
-       );
+    required super.code,
+    super.origin,
+    super.comparedValues,
+    super.rawLogs = const [],
+    super.signature,
+    super.failure,
+  }) : super(idlName: null, idlMessage: null);
 }
 
 /// Parses numeric program failures into typed exceptions.

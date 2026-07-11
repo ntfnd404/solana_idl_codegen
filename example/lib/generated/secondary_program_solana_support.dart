@@ -4,8 +4,6 @@
 // source-sha256: bfba19c124c33b827b5c139cc62b583f9c36aafb5951f72e02387a67705816a7
 // semantic-ir-sha256: 116502c850c55b1b16510193442452e33c2161adb8e40f36a00d8c66826e6b0a
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated runtime support for `secondary_program`.
 library;
 
@@ -1148,9 +1146,13 @@ final class SecondaryProgramExternalAccountSeedResolverCallback
 }
 
 bool _programBytesEqual(List<int> left, List<int> right) {
-  if (left.length != right.length) return false;
+  if (left.length != right.length) {
+    return false;
+  }
   for (var index = 0; index < left.length; index++) {
-    if (left[index] != right[index]) return false;
+    if (left[index] != right[index]) {
+      return false;
+    }
   }
   return true;
 }
@@ -1227,7 +1229,9 @@ String _programEncodeBase58(List<int> bytes) {
     number ~/= BigInt.from(58);
   }
   for (final byte in bytes) {
-    if (byte != 0) break;
+    if (byte != 0) {
+      break;
+    }
     encoded.write('1');
   }
   return encoded.toString().split('').reversed.join();

@@ -1,5 +1,6 @@
 import '../idl.dart';
 import '../naming.dart';
+import 'generated_feature_plan.dart';
 import 'generator_version.dart';
 import 'name_allocator.dart';
 import 'semantic_digest.dart';
@@ -12,6 +13,7 @@ final class GeneratorContext {
     required this.naming,
     required this.sourceDigest,
   }) : semanticDigest = SemanticDigest.compute(program),
+       features = GeneratedFeaturePlan.fromProgram(program),
        instructionHelpers = InstructionHelperNameAllocator(
          naming,
        ).allocate(program);
@@ -27,6 +29,9 @@ final class GeneratorContext {
 
   /// SHA-256 digest of canonical wire-relevant IDL semantics.
   final String semanticDigest;
+
+  /// Optional declarations required by the validated program IR.
+  final GeneratedFeaturePlan features;
 
   /// Allocated helper type names for every instruction.
   final Map<IdlInstruction, InstructionHelperNames> instructionHelpers;
@@ -57,7 +62,5 @@ final class GeneratorContext {
 // source-sha256: $sourceDigest
 // semantic-ir-sha256: $semanticDigest
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 ''';
 }

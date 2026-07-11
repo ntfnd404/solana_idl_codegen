@@ -170,7 +170,9 @@ final class EventModelEmitter extends SectionEmitter {
             ..modifier = MethodModifier.async
             ..docs.add('/// Closes the raw subscription exactly once.')
             ..body = const Code('''
-if (_closed) return;
+if (_closed) {
+  return;
+}
 _closed = true;
 await _raw.close();'''),
         ),

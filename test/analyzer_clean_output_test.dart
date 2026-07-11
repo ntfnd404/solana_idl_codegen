@@ -8,46 +8,55 @@ void main() {
   const generator = SolanaIdlGenerator();
   final fixture = File('test/fixtures/analyzer_clean.json').readAsStringSync();
 
-  test('generic nullable and resolver fixture is analyzer-clean', () async {
-    for (final layout in OutputLayout.values) {
-      final root = await Directory.systemTemp.createTemp(
-        'solana_idl_analyzer_matrix_',
-      );
-      addTearDown(() => root.delete(recursive: true));
-      await File(p.join(root.path, 'pubspec.yaml')).writeAsString('''
+  test('full and minimal fixtures are analyzer-clean', () async {
+    final fixtures = {'full': fixture, 'minimal': _minimalFixture};
+    for (final fixtureEntry in fixtures.entries) {
+      for (final layout in OutputLayout.values) {
+        final root = await Directory.systemTemp.createTemp(
+          'solana_idl_analyzer_${fixtureEntry.key}_${layout.name}_',
+        );
+        addTearDown(() => root.delete(recursive: true));
+        await File(p.join(root.path, 'pubspec.yaml')).writeAsString('''
 name: analyzer_matrix_${layout.name}
 publish_to: none
 
 environment:
   sdk: ^3.12.2
 ''');
-      await File(p.join(root.path, 'analysis_options.yaml')).writeAsString('''
+        await File(p.join(root.path, 'analysis_options.yaml')).writeAsString('''
 linter:
   rules:
     curly_braces_in_flow_control_structures: true
+    prefer_initializing_formals: true
+    type_init_formals: true
+    use_super_parameters: true
 ''');
-      final generated = generator.generateString(
-        fixture,
-        options: GenerationOptions(layout: layout),
-      );
-      final sources = await _writeGenerated(root, generated, layout);
-
-      for (final source in sources) {
-        expect(source, isNot(contains('PDA_SOURCE_UNRESOLVED')));
-        expect(
-          source,
-          isNot(contains(RegExp(r"if \((\w+) != null\) '[^']+': \1!"))),
+        final generated = generator.generateString(
+          fixtureEntry.value,
+          options: GenerationOptions(layout: layout),
         );
-        expect(source, isNot(contains(RegExp(r'(\w+) == null \? null : \1!'))));
-      }
+        final sources = await _writeGenerated(root, generated, layout);
 
-      await _runDart(root, ['pub', 'get']);
-      await _runDart(root, [
-        'analyze',
-        '--fatal-warnings',
-        '--fatal-infos',
-        '.',
-      ]);
+        for (final source in sources) {
+          expect(source, isNot(contains('PDA_SOURCE_UNRESOLVED')));
+          expect(
+            source,
+            isNot(contains(RegExp(r"if \((\w+) != null\) '[^']+': \1!"))),
+          );
+          expect(
+            source,
+            isNot(contains(RegExp(r'(\w+) == null \? null : \1!'))),
+          );
+        }
+
+        await _runDart(root, ['pub', 'get']);
+        await _runDart(root, [
+          'analyze',
+          '--fatal-warnings',
+          '--fatal-infos',
+          '.',
+        ]);
+      }
     }
   });
 
@@ -327,5 +336,22 @@ Future<void> main() async {
   } on AnalyzerMatrixBorshException {
     // Expected decode failure remains typed.
   }
+}
+''';
+
+const _minimalFixture = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {
+    "name": "minimal_matrix",
+    "version": "1.0.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [],
+  "accounts": [],
+  "events": [],
+  "errors": [],
+  "types": [],
+  "constants": []
 }
 ''';

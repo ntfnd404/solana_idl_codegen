@@ -87,13 +87,11 @@ final class ProgramExceptionModelEmitter extends SectionEmitter {
           Constructor(
             (builder) => builder
               ..docs.add('/// Creates this typed program exception.')
-              ..optionalParameters.addAll(exceptionParameters())
+              ..optionalParameters.addAll(exceptionParameters(toSuper: true))
               ..initializers.add(
                 Code(
                   "super(code: $code, idlName: '${escape(sourceName)}', "
-                  "idlMessage: '${escape(message)}', origin: origin, "
-                  'comparedValues: comparedValues, rawLogs: rawLogs, '
-                  'signature: signature, failure: failure)',
+                  "idlMessage: '${escape(message)}')",
                 ),
               ),
           ),
@@ -115,30 +113,32 @@ final class ProgramExceptionModelEmitter extends SectionEmitter {
               Parameter(
                 (builder) => builder
                   ..name = 'code'
-                  ..type = refer('int')
+                  ..type = null
                   ..named = true
-                  ..required = true,
+                  ..required = true
+                  ..toSuper = true,
               ),
-              ...exceptionParameters(),
+              ...exceptionParameters(toSuper: true),
             ])
             ..initializers.add(
-              const Code(
-                'super(code: code, idlName: null, idlMessage: null, '
-                'origin: origin, comparedValues: comparedValues, '
-                'rawLogs: rawLogs, signature: signature, failure: failure)',
-              ),
+              const Code('super(idlName: null, idlMessage: null)'),
             ),
         ),
       ),
   );
 
   /// Shared constructor parameters for typed program exceptions.
-  List<Parameter> exceptionParameters() => [
-    _named('origin', '${type('error_origin')}?'),
-    _named('comparedValues', '${type('compared_values')}?'),
-    _named('rawLogs', 'List<String>', defaultValue: 'const []'),
-    _named('signature', 'String?'),
-    _named('failure', '${type('transaction_failure')}?'),
+  List<Parameter> exceptionParameters({bool toSuper = false}) => [
+    _named('origin', '${type('error_origin')}?', toSuper: toSuper),
+    _named('comparedValues', '${type('compared_values')}?', toSuper: toSuper),
+    _named(
+      'rawLogs',
+      'List<String>',
+      defaultValue: 'const []',
+      toSuper: toSuper,
+    ),
+    _named('signature', 'String?', toSuper: toSuper),
+    _named('failure', '${type('transaction_failure')}?', toSuper: toSuper),
   ];
 
   Field _field(String name, String fieldType, String docs) => Field(
@@ -149,12 +149,17 @@ final class ProgramExceptionModelEmitter extends SectionEmitter {
       ..docs.add('/// $docs'),
   );
 
-  Parameter _named(String name, String parameterType, {String? defaultValue}) =>
-      Parameter(
-        (builder) => builder
-          ..name = name
-          ..type = refer(parameterType)
-          ..named = true
-          ..defaultTo = defaultValue == null ? null : Code(defaultValue),
-      );
+  Parameter _named(
+    String name,
+    String parameterType, {
+    String? defaultValue,
+    bool toSuper = false,
+  }) => Parameter(
+    (builder) => builder
+      ..name = name
+      ..type = toSuper ? null : refer(parameterType)
+      ..named = true
+      ..toSuper = toSuper
+      ..defaultTo = defaultValue == null ? null : Code(defaultValue),
+  );
 }

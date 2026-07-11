@@ -119,6 +119,26 @@ void main() {
           isNot(contains('curly_braces_in_flow_control_structures')),
           reason: '${entry.key} suppresses a generated control-flow lint.',
         );
+        expect(
+          dart,
+          isNot(contains('use_super_parameters')),
+          reason: '${entry.key} suppresses a generated constructor lint.',
+        );
+        expect(
+          dart,
+          isNot(contains('prefer_initializing_formals')),
+          reason: '${entry.key} suppresses a generated constructor lint.',
+        );
+        expect(
+          dart,
+          isNot(contains('unused_element')),
+          reason: '${entry.key} suppresses unused generated declarations.',
+        );
+        expect(
+          dart,
+          isNot(contains('unused_import')),
+          reason: '${entry.key} suppresses unused generated imports.',
+        );
       }
     }
   });

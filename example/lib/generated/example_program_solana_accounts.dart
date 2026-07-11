@@ -4,8 +4,6 @@
 // source-sha256: 2865113b5e9095b7a15ecca890930530f1875b9cd72df2cd2c81ac066ae07d80
 // semantic-ir-sha256: 5a434b479f377019592da21c1dd21985819054fa8f3ddcca8908f25645f95fef
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated account API for `example_program`.
 library;
 
@@ -41,7 +39,9 @@ abstract final class ExampleProgramMessageAccount {
     List<int> data, {
     ExampleProgramDecodeLimits limits = ExampleProgramDecodeLimits.defaults,
   }) {
-    if (!_hasDiscriminator(data)) return null;
+    if (!_hasDiscriminator(data)) {
+      return null;
+    }
     return ExampleProgramMessage.codec
         .decodePrefix(data.sublist(discriminator.length), limits: limits)
         .value;
@@ -80,9 +80,13 @@ abstract final class ExampleProgramMessageAccount {
   }
 
   static bool _hasDiscriminator(List<int> data) {
-    if (data.length < discriminator.length) return false;
+    if (data.length < discriminator.length) {
+      return false;
+    }
     for (var index = 0; index < discriminator.length; index++) {
-      if (data[index] != discriminator[index]) return false;
+      if (data[index] != discriminator[index]) {
+        return false;
+      }
     }
     return true;
   }
@@ -145,7 +149,9 @@ final class ExampleProgramAccountsClient {
     ExampleProgramDecodeLimits limits = ExampleProgramDecodeLimits.defaults,
   }) async {
     final snapshot = await reader.readAccount(address, options: options);
-    if (snapshot == null) return null;
+    if (snapshot == null) {
+      return null;
+    }
     if (snapshot.owner != ExampleProgramProgram.programAddress) {
       throw const ExampleProgramAccountException(
         code: 'ACCOUNT_OWNER_MISMATCH',
@@ -177,7 +183,9 @@ final class ExampleProgramAccountsClient {
     }
     return List.unmodifiable(
       snapshots.map((snapshot) {
-        if (snapshot == null) return null;
+        if (snapshot == null) {
+          return null;
+        }
         if (snapshot.owner != ExampleProgramProgram.programAddress) {
           throw const ExampleProgramAccountException(
             code: 'ACCOUNT_OWNER_MISMATCH',

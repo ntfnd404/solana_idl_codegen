@@ -4,25 +4,10 @@
 // source-sha256: 2865113b5e9095b7a15ecca890930530f1875b9cd72df2cd2c81ac066ae07d80
 // semantic-ir-sha256: 5a434b479f377019592da21c1dd21985819054fa8f3ddcca8908f25645f95fef
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated value models for `example_program`.
 library;
 
-import 'dart:typed_data';
 import 'example_program_solana_support.dart';
-
-bool _programListEquals<T>(
-  List<T> left,
-  List<T> right,
-  bool Function(T left, T right) equals,
-) {
-  if (left.length != right.length) return false;
-  for (var index = 0; index < left.length; index++) {
-    if (!equals(left[index], right[index])) return false;
-  }
-  return true;
-}
 
 /// Generated metadata for `example_program`.
 abstract final class ExampleProgramProgram {
@@ -49,12 +34,10 @@ abstract final class ExampleProgramProgram {
 final class ExampleProgramMessage {
   /// Creates a validated immutable value.
   ExampleProgramMessage({
-    required ExampleProgramAddress authority,
-    required BigInt id,
-    required String text,
-  }) : authority = authority,
-       id = id,
-       text = text;
+    required this.authority,
+    required this.id,
+    required this.text,
+  });
 
   /// Value of the IDL field `authority`.
   final ExampleProgramAddress authority;
@@ -99,11 +82,7 @@ final class ExampleProgramMessage {
 /// Immutable Borsh value for `MessageCreated`.
 final class ExampleProgramMessageCreated {
   /// Creates a validated immutable value.
-  ExampleProgramMessageCreated({
-    required ExampleProgramAddress message,
-    required BigInt id,
-  }) : message = message,
-       id = id;
+  ExampleProgramMessageCreated({required this.message, required this.id});
 
   /// Value of the IDL field `message`.
   final ExampleProgramAddress message;

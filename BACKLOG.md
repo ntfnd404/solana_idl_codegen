@@ -13,13 +13,13 @@ Progress:
 - [x] remove the unused `empty_constructor_bodies` suppression;
 - [x] emit block bodies for assignment branches and remove
   `curly_braces_in_flow_control_structures`;
-- [ ] use initializing formals where no defensive copy or validation is
+- [x] use initializing formals where no defensive copy or validation is
   required, then remove `prefer_initializing_formals`;
-- [ ] emit super parameters for forwarding exception constructors, then remove
+- [x] emit super parameters for forwarding exception constructors, then remove
   `use_super_parameters`;
-- [ ] derive modular imports from the declarations actually emitted, then
+- [x] derive modular imports from the declarations actually emitted, then
   remove `unused_import`;
-- [ ] emit private helpers such as `_programListEquals` and `_startsWith` only
+- [x] emit private helpers such as `_programListEquals` and `_startsWith` only
   when referenced, then remove `unused_element`.
 
 Every removal must be covered by bundled and modular analyzer tests using the

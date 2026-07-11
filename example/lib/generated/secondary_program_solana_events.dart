@@ -4,8 +4,6 @@
 // source-sha256: bfba19c124c33b827b5c139cc62b583f9c36aafb5951f72e02387a67705816a7
 // semantic-ir-sha256: 116502c850c55b1b16510193442452e33c2161adb8e40f36a00d8c66826e6b0a
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated event API for `secondary_program`.
 library;
 
@@ -88,7 +86,9 @@ final class SecondaryProgramTypedEventSubscription {
 
   /// Closes the raw subscription exactly once.
   Future<void> close() async {
-    if (_closed) return;
+    if (_closed) {
+      return;
+    }
     _closed = true;
     await _raw.close();
   }
@@ -175,13 +175,5 @@ final class SecondaryProgramEventsClient {
 
   SecondaryProgramEvent? _decode(Uint8List data) {
     return null;
-  }
-
-  bool _startsWith(List<int> data, List<int> prefix) {
-    if (data.length < prefix.length) return false;
-    for (var index = 0; index < prefix.length; index++) {
-      if (data[index] != prefix[index]) return false;
-    }
-    return true;
   }
 }

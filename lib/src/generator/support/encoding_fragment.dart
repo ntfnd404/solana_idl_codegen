@@ -22,9 +22,13 @@ final class EncodingSupportFragment extends SectionEmitter {
             _parameter('right', 'List<int>'),
           ])
           ..body = const Code('''
-if (left.length != right.length) return false;
+if (left.length != right.length) {
+  return false;
+}
 for (var index = 0; index < left.length; index++) {
-  if (left[index] != right[index]) return false;
+  if (left[index] != right[index]) {
+    return false;
+  }
 }
 return true;'''),
       ),
@@ -127,7 +131,9 @@ while (number > BigInt.zero) {
   number ~/= BigInt.from(58);
 }
 for (final byte in bytes) {
-  if (byte != 0) break;
+  if (byte != 0) {
+    break;
+  }
   encoded.write('1');
 }
 return encoded.toString().split('').reversed.join();'''),

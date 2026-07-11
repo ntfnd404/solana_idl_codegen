@@ -71,21 +71,26 @@ return ${type('typed_event_subscription')}._(
             ..requiredParameters.add(_parameter('data', 'Uint8List'))
             ..body = Code(_decodeBody()),
         ),
-        Method(
-          (builder) => builder
-            ..name = '_startsWith'
-            ..returns = refer('bool')
-            ..requiredParameters.addAll([
-              _parameter('data', 'List<int>'),
-              _parameter('prefix', 'List<int>'),
-            ])
-            ..body = const Code('''
-if (data.length < prefix.length) return false;
+        if (context.features.hasEvents)
+          Method(
+            (builder) => builder
+              ..name = '_startsWith'
+              ..returns = refer('bool')
+              ..requiredParameters.addAll([
+                _parameter('data', 'List<int>'),
+                _parameter('prefix', 'List<int>'),
+              ])
+              ..body = const Code('''
+if (data.length < prefix.length) {
+  return false;
+}
 for (var index = 0; index < prefix.length; index++) {
-  if (data[index] != prefix[index]) return false;
+  if (data[index] != prefix[index]) {
+    return false;
+  }
 }
 return true;'''),
-        ),
+          ),
       ]),
   );
 

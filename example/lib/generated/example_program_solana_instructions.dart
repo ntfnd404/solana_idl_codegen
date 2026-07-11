@@ -4,12 +4,9 @@
 // source-sha256: 2865113b5e9095b7a15ecca890930530f1875b9cd72df2cd2c81ac066ae07d80
 // semantic-ir-sha256: 5a434b479f377019592da21c1dd21985819054fa8f3ddcca8908f25645f95fef
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated instruction API for `example_program`.
 library;
 
-import 'dart:typed_data';
 import 'example_program_solana_support.dart';
 import 'example_program_solana_types.dart';
 
@@ -17,9 +14,7 @@ import 'example_program_solana_types.dart';
 /// Creates a message account and returns its numeric identifier.
 final class ExampleProgramCreateMessageArgs {
   /// Creates instruction arguments.
-  ExampleProgramCreateMessageArgs({required BigInt id, required String text})
-    : id = id,
-      text = text;
+  ExampleProgramCreateMessageArgs({required this.id, required this.text});
 
   /// IDL argument `id`.
   final BigInt id;

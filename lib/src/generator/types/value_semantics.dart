@@ -69,6 +69,21 @@ final class GeneratedValueSemantics {
   String immutableExpression(IdlType value, String expression) =>
       _immutableExpression(value, expression, 0);
 
+  /// Whether construction must transform [value] before storing it.
+  ///
+  /// Identity values can use initializing formals. Collection, byte, float,
+  /// and optional values retain the explicit initializer that enforces the
+  /// generated model's defensive-copy and normalization guarantees.
+  bool requiresImmutableTransformation(IdlType value) => switch (value) {
+    IdlPrimitiveType(name: 'bytes' || 'f32' || 'f64') ||
+    IdlVectorType() ||
+    IdlArrayType() ||
+    IdlGenericArrayType() ||
+    IdlOptionType() ||
+    IdlCOptionType() => true,
+    _ => false,
+  };
+
   String _immutableExpression(
     IdlType value,
     String expression,

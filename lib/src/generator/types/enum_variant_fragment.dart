@@ -73,21 +73,29 @@ final class TypeEnumVariantFragment extends SectionEmitter {
       );
     for (final field in fields) {
       final fieldName = context.fieldMember(fields, field);
+      final requiresTransformation = _values.requiresImmutableTransformation(
+        field.type,
+      );
       builder.optionalParameters.add(
         Parameter(
           (builder) => builder
             ..name = fieldName
-            ..type = refer(_parameterType(field.type))
+            ..type = requiresTransformation
+                ? refer(_parameterType(field.type))
+                : null
             ..named = true
-            ..required = true,
+            ..required = true
+            ..toThis = !requiresTransformation,
         ),
       );
-      builder.initializers.add(
-        Code(
-          '$fieldName = '
-          '${_values.immutableExpression(field.type, fieldName)}',
-        ),
-      );
+      if (requiresTransformation) {
+        builder.initializers.add(
+          Code(
+            '$fieldName = '
+            '${_values.immutableExpression(field.type, fieldName)}',
+          ),
+        );
+      }
     }
     final floats = fields.where(
       (field) =>

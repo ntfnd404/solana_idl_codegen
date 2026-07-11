@@ -4,25 +4,10 @@
 // source-sha256: bfba19c124c33b827b5c139cc62b583f9c36aafb5951f72e02387a67705816a7
 // semantic-ir-sha256: 116502c850c55b1b16510193442452e33c2161adb8e40f36a00d8c66826e6b0a
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated value models for `secondary_program`.
 library;
 
-import 'dart:typed_data';
 import 'secondary_program_solana_support.dart';
-
-bool _programListEquals<T>(
-  List<T> left,
-  List<T> right,
-  bool Function(T left, T right) equals,
-) {
-  if (left.length != right.length) return false;
-  for (var index = 0; index < left.length; index++) {
-    if (!equals(left[index], right[index])) return false;
-  }
-  return true;
-}
 
 /// Generated metadata for `secondary_program`.
 abstract final class SecondaryProgramProgram {

@@ -106,9 +106,13 @@ if (!_hasDiscriminator(data)) {
               ..returns = refer('bool')
               ..requiredParameters.add(_parameter('data', 'List<int>'))
               ..body = const Code('''
-if (data.length < discriminator.length) return false;
+if (data.length < discriminator.length) {
+  return false;
+}
 for (var index = 0; index < discriminator.length; index++) {
-  if (data[index] != discriminator[index]) return false;
+  if (data[index] != discriminator[index]) {
+    return false;
+  }
 }
 return true;'''),
           ),
@@ -176,7 +180,9 @@ return true;'''),
         ),
       )
       ..body = Code('''
-if (!_hasDiscriminator(data)) return null;
+if (!_hasDiscriminator(data)) {
+  return null;
+}
 return $model.codec.decodePrefix(
   data.sublist(discriminator.length),
   limits: limits,

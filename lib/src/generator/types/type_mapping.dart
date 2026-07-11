@@ -127,10 +127,10 @@ final class DartTypeMapping {
       '$writer.writeUnsigned(BigInt.from($expression.length), 4); '
           'for (final item in $expression) { ${_write(inner, writer, 'item', depth + 1)} }',
     IdlArrayType(:final inner, :final length) =>
-      'if ($expression.length != $length) throw ArgumentError.value($expression.length, "value"); '
+      'if ($expression.length != $length) { throw ArgumentError.value($expression.length, "value"); } '
           'for (final item in $expression) { ${_write(inner, writer, 'item', depth + 1)} }',
     IdlGenericArrayType(:final inner, :final lengthName) =>
-      'if ($expression.length != ${member(lengthName)}) throw ArgumentError.value($expression.length, "value"); '
+      'if ($expression.length != ${member(lengthName)}) { throw ArgumentError.value($expression.length, "value"); } '
           'for (final item in $expression) { ${_write(inner, writer, 'item', depth + 1)} }',
     IdlDefinedType(:final name, :final generics, :final constGenerics) =>
       '${_codec(name, generics, constGenerics)}.write($writer, $expression);',

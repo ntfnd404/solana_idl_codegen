@@ -80,7 +80,9 @@ return $api.decodeAccount(snapshot.data, limits: limits);''',
         body:
             '''
 final snapshot = await reader.readAccount(address, options: options);
-if (snapshot == null) return null;
+if (snapshot == null) {
+  return null;
+}
 ${_ownerCheck('snapshot')}
 return $api.decodeAccount(snapshot.data, limits: limits);''',
       ),
@@ -99,7 +101,9 @@ if (snapshots.length != addresses.length) {
   throw const ${type('account_exception')}(code: 'ACCOUNT_RESULT_CARDINALITY', message: 'AccountReader changed result cardinality.');
 }
 return List.unmodifiable(snapshots.map((snapshot) {
-  if (snapshot == null) return null;
+  if (snapshot == null) {
+    return null;
+  }
   ${_ownerCheck('snapshot')}
   return $api.decodeAccount(snapshot.data, limits: limits);
 }));''',

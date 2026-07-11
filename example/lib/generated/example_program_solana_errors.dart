@@ -4,8 +4,6 @@
 // source-sha256: 2865113b5e9095b7a15ecca890930530f1875b9cd72df2cd2c81ac066ae07d80
 // semantic-ir-sha256: 5a434b479f377019592da21c1dd21985819054fa8f3ddcca8908f25645f95fef
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated program errors for `example_program`.
 library;
 
@@ -101,20 +99,15 @@ final class ExampleProgramEmptyMessageException
     extends ExampleProgramProgramException {
   /// Creates this typed program exception.
   ExampleProgramEmptyMessageException({
-    ExampleProgramErrorOrigin? origin,
-    ExampleProgramComparedValues? comparedValues,
-    List<String> rawLogs = const [],
-    String? signature,
-    ExampleProgramTransactionFailure? failure,
+    super.origin,
+    super.comparedValues,
+    super.rawLogs = const [],
+    super.signature,
+    super.failure,
   }) : super(
          code: 6000,
          idlName: 'EmptyMessage',
          idlMessage: 'Message text cannot be empty',
-         origin: origin,
-         comparedValues: comparedValues,
-         rawLogs: rawLogs,
-         signature: signature,
-         failure: failure,
        );
 }
 
@@ -123,22 +116,13 @@ final class ExampleProgramUnknownProgramException
     extends ExampleProgramProgramException {
   /// Creates an unknown program exception.
   ExampleProgramUnknownProgramException({
-    required int code,
-    ExampleProgramErrorOrigin? origin,
-    ExampleProgramComparedValues? comparedValues,
-    List<String> rawLogs = const [],
-    String? signature,
-    ExampleProgramTransactionFailure? failure,
-  }) : super(
-         code: code,
-         idlName: null,
-         idlMessage: null,
-         origin: origin,
-         comparedValues: comparedValues,
-         rawLogs: rawLogs,
-         signature: signature,
-         failure: failure,
-       );
+    required super.code,
+    super.origin,
+    super.comparedValues,
+    super.rawLogs = const [],
+    super.signature,
+    super.failure,
+  }) : super(idlName: null, idlMessage: null);
 }
 
 /// Parses numeric program failures into typed exceptions.

@@ -4,8 +4,6 @@
 // source-sha256: 2865113b5e9095b7a15ecca890930530f1875b9cd72df2cd2c81ac066ae07d80
 // semantic-ir-sha256: 5a434b479f377019592da21c1dd21985819054fa8f3ddcca8908f25645f95fef
 // SPDX-License-Identifier: MIT
-// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
-
 /// Generated runtime support for `example_program`.
 library;
 
@@ -1144,9 +1142,13 @@ final class ExampleProgramExternalAccountSeedResolverCallback
 }
 
 bool _programBytesEqual(List<int> left, List<int> right) {
-  if (left.length != right.length) return false;
+  if (left.length != right.length) {
+    return false;
+  }
   for (var index = 0; index < left.length; index++) {
-    if (left[index] != right[index]) return false;
+    if (left[index] != right[index]) {
+      return false;
+    }
   }
   return true;
 }
@@ -1223,7 +1225,9 @@ String _programEncodeBase58(List<int> bytes) {
     number ~/= BigInt.from(58);
   }
   for (final byte in bytes) {
-    if (byte != 0) break;
+    if (byte != 0) {
+      break;
+    }
     encoded.write('1');
   }
   return encoded.toString().split('').reversed.join();
