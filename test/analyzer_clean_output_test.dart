@@ -21,6 +21,11 @@ publish_to: none
 environment:
   sdk: ^3.12.2
 ''');
+      await File(p.join(root.path, 'analysis_options.yaml')).writeAsString('''
+linter:
+  rules:
+    curly_braces_in_flow_control_structures: true
+''');
       final generated = generator.generateString(
         fixture,
         options: GenerationOptions(layout: layout),

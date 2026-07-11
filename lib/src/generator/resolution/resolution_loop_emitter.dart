@@ -32,9 +32,13 @@ final class ResolutionLoopEmitter extends SectionEmitter {
     _emitPdaAndRelations(out, instruction, leaves, '      ');
     out
       ..writeln(
-        '      if (${_allResolutionParticipantsResolvedCondition(leaves)}) break;',
+        '      if (${_allResolutionParticipantsResolvedCondition(leaves)}) {',
       )
-      ..writeln('      if (!progressed) break;')
+      ..writeln('        break;')
+      ..writeln('      }')
+      ..writeln('      if (!progressed) {')
+      ..writeln('        break;')
+      ..writeln('      }')
       ..writeln('    }');
   }
 

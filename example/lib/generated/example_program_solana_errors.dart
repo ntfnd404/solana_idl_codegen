@@ -4,7 +4,7 @@
 // source-sha256: 2865113b5e9095b7a15ecca890930530f1875b9cd72df2cd2c81ac066ae07d80
 // semantic-ir-sha256: 5a434b479f377019592da21c1dd21985819054fa8f3ddcca8908f25645f95fef
 // SPDX-License-Identifier: MIT
-// ignore_for_file: curly_braces_in_flow_control_structures, empty_constructor_bodies, prefer_initializing_formals, unused_element, unused_import, use_super_parameters
+// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
 
 /// Generated program errors for `example_program`.
 library;
@@ -211,16 +211,21 @@ abstract final class ExampleProgramProgramErrorParser {
     for (var index = 0; index < logs.length; index++) {
       final line = logs[index];
       final anchor = RegExp(r'Error Number: ([0-9]+)').firstMatch(line);
-      if (anchor != null) code = int.parse(anchor.group(1)!);
+      if (anchor != null) {
+        code = int.parse(anchor.group(1)!);
+      }
       final custom = RegExp(
         r'custom program error: 0x([0-9a-fA-F]+)',
       ).firstMatch(line);
-      if (custom != null) code = int.parse(custom.group(1)!, radix: 16);
+      if (custom != null) {
+        code = int.parse(custom.group(1)!, radix: 16);
+      }
       final account = RegExp(
         r'AnchorError caused by account: ([A-Za-z_][A-Za-z0-9_]*)',
       ).firstMatch(line);
-      if (account != null)
+      if (account != null) {
         origin = ExampleProgramAccountErrorOrigin(account.group(1)!);
+      }
       final program = RegExp(
         r'AnchorError caused by program: ([1-9A-HJ-NP-Za-km-z]+)',
       ).firstMatch(line);

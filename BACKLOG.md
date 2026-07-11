@@ -3,6 +3,30 @@
 This file tracks deliberate follow-up work that is not required for the
 current publishable `0.1.0` package, but should not be forgotten.
 
+## Remove generated lint suppressions
+
+Generated libraries should satisfy common consumer lint sets through emitted
+code and feature-aware imports/helpers instead of broad file suppressions.
+
+Progress:
+
+- [x] remove the unused `empty_constructor_bodies` suppression;
+- [x] emit block bodies for assignment branches and remove
+  `curly_braces_in_flow_control_structures`;
+- [ ] use initializing formals where no defensive copy or validation is
+  required, then remove `prefer_initializing_formals`;
+- [ ] emit super parameters for forwarding exception constructors, then remove
+  `use_super_parameters`;
+- [ ] derive modular imports from the declarations actually emitted, then
+  remove `unused_import`;
+- [ ] emit private helpers such as `_programListEquals` and `_startsWith` only
+  when referenced, then remove `unused_element`.
+
+Every removal must be covered by bundled and modular analyzer tests using the
+lint explicitly, plus generic, checked-in example, and external IDL fixtures.
+Do not replace targeted suppressions with `type=lint` or consumer-side analyzer
+configuration.
+
 ## Account-data PDA seed type policy
 
 Mango V4 remains a skipped real-world compatibility fixture because it contains

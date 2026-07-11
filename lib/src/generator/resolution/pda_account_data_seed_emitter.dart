@@ -41,15 +41,21 @@ final class PdaAccountDataSeedEmitter {
     final snapshot = 'seedSnapshot$index';
     out
       ..writeln('${indent}final seedReader$index = context.accountReader;')
+      ..write(indent)
+      ..writeln('if (seedReader$index == null) {')
       ..writeln(
-        "${indent}if (seedReader$index == null) throw ${literals.type('pda_exception')}(code: 'PDA_ACCOUNT_READER_REQUIRED', message: 'AccountReader is required for account-data PDA seeds.', seedIndex: $index);",
+        "$indent  throw ${literals.type('pda_exception')}(code: 'PDA_ACCOUNT_READER_REQUIRED', message: 'AccountReader is required for account-data PDA seeds.', seedIndex: $index);",
       )
+      ..writeln('$indent}')
       ..writeln(
         '$indent final $snapshot = await (seedAccountCache[$address] ??= seedReader$index.readAccount($address, options: context.readOptions));',
       )
+      ..write(indent)
+      ..writeln('if ($snapshot == null) {')
       ..writeln(
-        "${indent}if ($snapshot == null) throw ${literals.type('pda_exception')}(code: 'PDA_SOURCE_MISSING', message: 'PDA seed source account does not exist.', seedIndex: $index);",
-      );
+        "$indent  throw ${literals.type('pda_exception')}(code: 'PDA_SOURCE_MISSING', message: 'PDA seed source account does not exist.', seedIndex: $index);",
+      )
+      ..writeln('$indent}');
 
     if (isLocalAccount && definition != null && accountType != null) {
       _emitLocalAccountSeed(
@@ -94,9 +100,14 @@ final class PdaAccountDataSeedEmitter {
     }
     final decoded = 'seedAccount$index';
     out
+      ..write(indent)
       ..writeln(
-        "${indent}if ($snapshot.owner != ${literals.type('program')}.programAddress) throw ${literals.type('pda_exception')}(code: 'PDA_SOURCE_OWNER', message: 'PDA seed source account owner mismatch.', seedIndex: $index);",
+        'if ($snapshot.owner != ${literals.type('program')}.programAddress) {',
       )
+      ..writeln(
+        "$indent  throw ${literals.type('pda_exception')}(code: 'PDA_SOURCE_OWNER', message: 'PDA seed source account owner mismatch.', seedIndex: $index);",
+      )
+      ..writeln('$indent}')
       ..writeln(
         '$indent final $decoded = ${literals.type('${accountType}_account')}.decodeAccount($snapshot.data, limits: context.decodeLimits);',
       );
@@ -126,9 +137,12 @@ final class PdaAccountDataSeedEmitter {
       ..writeln(
         '${indent}final externalSeedResolver$index = context.externalAccountSeedResolver;',
       )
+      ..write(indent)
+      ..writeln('if (externalSeedResolver$index == null) {')
       ..writeln(
-        "${indent}if (externalSeedResolver$index == null) throw ${literals.type('pda_exception')}(code: 'PDA_EXTERNAL_RESOLVER_REQUIRED', message: 'ExternalAccountSeedResolver is required.', seedIndex: $index);",
+        "$indent  throw ${literals.type('pda_exception')}(code: 'PDA_EXTERNAL_RESOLVER_REQUIRED', message: 'ExternalAccountSeedResolver is required.', seedIndex: $index);",
       )
+      ..writeln('$indent}')
       ..writeln(
         '${indent}seeds.add(Uint8List.fromList(await externalSeedResolver$index.resolve(',
       )

@@ -136,11 +136,17 @@ String? right;
 for (var index = 0; index < logs.length; index++) {
   final line = logs[index];
   final anchor = RegExp(r'Error Number: ([0-9]+)').firstMatch(line);
-  if (anchor != null) code = int.parse(anchor.group(1)!);
+  if (anchor != null) {
+    code = int.parse(anchor.group(1)!);
+  }
   final custom = RegExp(r'custom program error: 0x([0-9a-fA-F]+)').firstMatch(line);
-  if (custom != null) code = int.parse(custom.group(1)!, radix: 16);
+  if (custom != null) {
+    code = int.parse(custom.group(1)!, radix: 16);
+  }
   final account = RegExp(r'AnchorError caused by account: ([A-Za-z_][A-Za-z0-9_]*)').firstMatch(line);
-  if (account != null) origin = ${type('account_error_origin')}(account.group(1)!);
+  if (account != null) {
+    origin = ${type('account_error_origin')}(account.group(1)!);
+  }
   final program = RegExp(r'AnchorError caused by program: ([1-9A-HJ-NP-Za-km-z]+)').firstMatch(line);
   if (program != null) {
     try {

@@ -109,6 +109,16 @@ void main() {
           isNot(contains(RegExp(r'\bdynamic\b'))),
           reason: '${entry.key} contains dynamic.',
         );
+        expect(
+          dart,
+          isNot(contains('empty_constructor_bodies')),
+          reason: '${entry.key} suppresses an unused constructor lint.',
+        );
+        expect(
+          dart,
+          isNot(contains('curly_braces_in_flow_control_structures')),
+          reason: '${entry.key} suppresses a generated control-flow lint.',
+        );
       }
     }
   });

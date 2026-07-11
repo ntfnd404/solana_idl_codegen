@@ -57,7 +57,7 @@ final class GeneratorContext {
 // source-sha256: $sourceDigest
 // semantic-ir-sha256: $semanticDigest
 // SPDX-License-Identifier: MIT
-// ignore_for_file: curly_braces_in_flow_control_structures, empty_constructor_bodies, prefer_initializing_formals, unused_element, unused_import, use_super_parameters
+// ignore_for_file: prefer_initializing_formals, unused_element, unused_import, use_super_parameters
 
 ''';
 }
