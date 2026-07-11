@@ -11,52 +11,60 @@ final class GeneratedFeaturePlan {
     required this.hasInstructions,
     required this.hasAccounts,
     required this.hasPdaSeeds,
+    required this.hasViews,
     required this.typesUseTypedData,
     required this.instructionsUseTypedData,
+    required this.clientUsesTypedData,
     required this.resolutionUsesConvert,
     required this.resolutionUsesAccounts,
     required this.resolutionUsesTypes,
-    required this.clientUsesTypes,
   });
 
   /// Computes generated features for [program].
-  factory GeneratedFeaturePlan.fromProgram(IdlProgram program) =>
-      GeneratedFeaturePlan._(
-        usesStructuralListEquality: program.types.any(
-          (definition) => _bodyUsesStructuralListEquality(definition.body),
-        ),
-        hasEvents: program.events.isNotEmpty,
-        hasInstructions: program.instructions.isNotEmpty,
-        hasAccounts: program.accounts.isNotEmpty,
-        hasPdaSeeds: program.instructions.any(
-          (instruction) => _accountsHavePdaSeeds(instruction.accounts),
-        ),
-        typesUseTypedData: program.types.any(
-          (definition) => _bodyUsesTypedData(definition.body),
-        ),
-        instructionsUseTypedData: program.instructions.any(
-          (instruction) => instruction.arguments.any(
-            (argument) => _typeUsesTypedData(argument.type),
+  factory GeneratedFeaturePlan.fromProgram(IdlProgram program) {
+    final views = program.instructions
+        .where(isViewInstruction)
+        .toList(growable: false);
+    return GeneratedFeaturePlan._(
+      usesStructuralListEquality: program.types.any(
+        (definition) => _bodyUsesStructuralListEquality(definition.body),
+      ),
+      hasEvents: program.events.isNotEmpty,
+      hasInstructions: program.instructions.isNotEmpty,
+      hasAccounts: program.accounts.isNotEmpty,
+      hasPdaSeeds: program.instructions.any(
+        (instruction) => _accountsHavePdaSeeds(instruction.accounts),
+      ),
+      hasViews: views.isNotEmpty,
+      typesUseTypedData:
+          program.types.any(
+            (definition) => _bodyUsesTypedData(definition.body),
+          ) ||
+          program.constants.any(
+            (constant) => _typeUsesTypedData(constant.type),
           ),
+      instructionsUseTypedData: program.instructions.any(
+        (instruction) => instruction.arguments.any(
+          (argument) => _typeUsesTypedData(argument.type),
         ),
-        resolutionUsesConvert: program.instructions.any(
-          (instruction) => _accountsUseUtf8Seeds(instruction.accounts),
+      ),
+      clientUsesTypedData: views.any(
+        (instruction) => _typeUsesTypedData(instruction.returns!),
+      ),
+      resolutionUsesConvert: program.instructions.any(
+        (instruction) => _accountsUseUtf8Seeds(instruction.accounts),
+      ),
+      resolutionUsesAccounts: program.instructions.any(
+        (instruction) => _accountsUseLocalAccountDataSeeds(
+          instruction.accounts,
+          program.accounts.map((account) => account.name).toSet(),
         ),
-        resolutionUsesAccounts: program.instructions.any(
-          (instruction) => _accountsUseLocalAccountDataSeeds(
-            instruction.accounts,
-            program.accounts.map((account) => account.name).toSet(),
-          ),
-        ),
-        resolutionUsesTypes: program.instructions.any(
-          (instruction) => _accountsNeedProgramMetadata(instruction.accounts),
-        ),
-        clientUsesTypes: program.instructions.any(
-          (instruction) =>
-              instruction.returns is IdlDefinedType &&
-              !_accountsContainWritable(instruction.accounts),
-        ),
-      );
+      ),
+      resolutionUsesTypes: program.instructions.any(
+        (instruction) => _accountsNeedProgramMetadata(instruction.accounts),
+      ),
+    );
+  }
 
   /// Whether generated value equality needs the private list helper.
   final bool usesStructuralListEquality;
@@ -73,11 +81,17 @@ final class GeneratedFeaturePlan {
   /// Whether account resolution emits byte-oriented PDA derivation code.
   final bool hasPdaSeeds;
 
+  /// Whether the client emits at least one read-only view method.
+  final bool hasViews;
+
   /// Whether type declarations mention `Uint8List`.
   final bool typesUseTypedData;
 
   /// Whether instruction declarations mention [Uint8List].
   final bool instructionsUseTypedData;
+
+  /// Whether emitted view signatures mention `Uint8List`.
+  final bool clientUsesTypedData;
 
   /// Whether PDA resolution encodes string seeds with `utf8`.
   final bool resolutionUsesConvert;
@@ -87,9 +101,6 @@ final class GeneratedFeaturePlan {
 
   /// Whether resolution references generated program metadata.
   final bool resolutionUsesTypes;
-
-  /// Whether view-client return values reference generated IDL types.
-  final bool clientUsesTypes;
 
   static bool _bodyUsesStructuralListEquality(IdlTypeBody body) =>
       switch (body) {
@@ -123,6 +134,7 @@ final class GeneratedFeaturePlan {
     IdlVectorType(:final inner) ||
     IdlArrayType(:final inner) ||
     IdlGenericArrayType(:final inner) => _typeUsesTypedData(inner),
+    IdlDefinedType(:final generics) => generics.any(_typeUsesTypedData),
     _ => false,
   };
 
@@ -204,16 +216,21 @@ final class GeneratedFeaturePlan {
     IdlPathSeed(valueType: IdlPrimitiveType(name: 'string')) => true,
     _ => false,
   };
+}
 
-  static bool _accountsContainWritable(List<IdlInstructionAccount> accounts) {
-    for (final account in accounts) {
-      switch (account) {
-        case IdlAccountItem(:final writable):
-          if (writable) return true;
-        case IdlAccountGroup(:final accounts):
-          if (_accountsContainWritable(accounts)) return true;
-      }
+/// Whether [instruction] produces a generated read-only view method.
+bool isViewInstruction(IdlInstruction instruction) =>
+    instruction.returns != null &&
+    !_accountsContainWritable(instruction.accounts);
+
+bool _accountsContainWritable(List<IdlInstructionAccount> accounts) {
+  for (final account in accounts) {
+    switch (account) {
+      case IdlAccountItem(:final writable):
+        if (writable) return true;
+      case IdlAccountGroup(:final accounts):
+        if (_accountsContainWritable(accounts)) return true;
     }
-    return false;
   }
+  return false;
 }

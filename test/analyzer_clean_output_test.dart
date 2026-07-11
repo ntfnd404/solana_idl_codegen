@@ -8,8 +8,15 @@ void main() {
   const generator = SolanaIdlGenerator();
   final fixture = File('test/fixtures/analyzer_clean.json').readAsStringSync();
 
-  test('full and minimal fixtures are analyzer-clean', () async {
-    final fixtures = {'full': fixture, 'minimal': _minimalFixture};
+  test('feature dependency fixtures are analyzer-clean', () async {
+    final fixtures = {
+      'full': fixture,
+      'minimal': _minimalFixture,
+      'bytes_constant': _bytesConstantFixture,
+      'bytes_view': _bytesViewFixture,
+      'generic_bytes_view': _genericBytesViewFixture,
+      'writable_bytes_return': _writableBytesReturnFixture,
+    };
     for (final fixtureEntry in fixtures.entries) {
       for (final layout in OutputLayout.values) {
         final root = await Directory.systemTemp.createTemp(
@@ -35,6 +42,9 @@ linter:
           fixtureEntry.value,
           options: GenerationOptions(layout: layout),
         );
+        if (layout == OutputLayout.modular) {
+          _expectFeatureImports(fixtureEntry.key, generated);
+        }
         final sources = await _writeGenerated(root, generated, layout);
 
         for (final source in sources) {
@@ -79,6 +89,27 @@ linter:
       await _runDart(root, ['run', 'main.dart']);
     },
   );
+}
+
+void _expectFeatureImports(String fixture, GenerationOutput generated) {
+  final types = generated.files['types.dart']!;
+  final client = generated.files['client.dart']!;
+  const typedDataImport = "import 'dart:typed_data';";
+  const typesImport = "import '__PROGRAM_STEM___solana_types.dart';";
+  switch (fixture) {
+    case 'bytes_constant':
+      expect(types, contains(typedDataImport));
+    case 'bytes_view':
+      expect(client, contains(typedDataImport));
+      expect(client, contains(typesImport));
+    case 'generic_bytes_view':
+      expect(types, contains(typedDataImport));
+      expect(client, contains(typedDataImport));
+      expect(client, contains(typesImport));
+    case 'writable_bytes_return':
+      expect(client, isNot(contains(typedDataImport)));
+      expect(client, isNot(contains(typesImport)));
+  }
 }
 
 Future<List<String>> _writeGenerated(
@@ -348,6 +379,92 @@ const _minimalFixture = r'''
     "spec": "0.1.0"
   },
   "instructions": [],
+  "accounts": [],
+  "events": [],
+  "errors": [],
+  "types": [],
+  "constants": []
+}
+''';
+
+const _bytesConstantFixture = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "bytes_constant", "version": "1.0.0", "spec": "0.1.0"},
+  "instructions": [],
+  "accounts": [],
+  "events": [],
+  "errors": [],
+  "types": [],
+  "constants": [{"name": "BLOB", "type": "bytes", "value": "[1, 2, 3]"}]
+}
+''';
+
+const _bytesViewFixture = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "bytes_view", "version": "1.0.0", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "read_bytes",
+    "discriminator": [1, 2, 3, 4, 5, 6, 7, 8],
+    "accounts": [],
+    "args": [],
+    "returns": "bytes"
+  }],
+  "accounts": [],
+  "events": [],
+  "errors": [],
+  "types": [],
+  "constants": []
+}
+''';
+
+const _genericBytesViewFixture = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "generic_bytes_view", "version": "1.0.0", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "read_wrapper",
+    "discriminator": [8, 7, 6, 5, 4, 3, 2, 1],
+    "accounts": [],
+    "args": [],
+    "returns": {"option": {"defined": {
+      "name": "Wrapper",
+      "generics": [{"kind": "type", "type": "bytes"}]
+    }}}
+  }],
+  "accounts": [],
+  "events": [],
+  "errors": [],
+  "types": [{
+    "name": "Wrapper",
+    "generics": [{"kind": "type", "name": "T"}],
+    "type": {"kind": "struct", "fields": [{"name": "value", "type": {"generic": "T"}}]}
+  }, {
+    "name": "BytesHolder",
+    "type": {"kind": "struct", "fields": [{
+      "name": "wrapper",
+      "type": {"defined": {
+        "name": "Wrapper",
+        "generics": [{"kind": "type", "type": "bytes"}]
+      }}
+    }]}
+  }],
+  "constants": []
+}
+''';
+
+const _writableBytesReturnFixture = r'''
+{
+  "address": "11111111111111111111111111111111",
+  "metadata": {"name": "writable_bytes_return", "version": "1.0.0", "spec": "0.1.0"},
+  "instructions": [{
+    "name": "write_bytes",
+    "discriminator": [2, 4, 6, 8, 1, 3, 5, 7],
+    "accounts": [{"name": "state", "writable": true}],
+    "args": [],
+    "returns": "bytes"
+  }],
   "accounts": [],
   "events": [],
   "errors": [],

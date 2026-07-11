@@ -153,13 +153,13 @@ final class DartGenerator {
         context,
         'Generated client facades for `${program.name}`.',
         [
+          if (context.features.clientUsesTypedData) 'dart:typed_data',
           '__PROGRAM_STEM___solana_accounts.dart',
           '__PROGRAM_STEM___solana_events.dart',
           if (context.features.hasInstructions)
             '__PROGRAM_STEM___solana_instructions.dart',
           '__PROGRAM_STEM___solana_support.dart',
-          if (context.features.clientUsesTypes)
-            '__PROGRAM_STEM___solana_types.dart',
+          if (context.features.hasViews) '__PROGRAM_STEM___solana_types.dart',
         ],
         sections['client']!,
       ),

@@ -1,6 +1,6 @@
 import 'package:code_builder/code_builder.dart';
 
-import '../idl.dart';
+import 'generated_feature_plan.dart';
 import 'section_emitter.dart';
 import 'types/type_mapping.dart';
 
@@ -15,10 +15,7 @@ final class ViewClientEmitter extends SectionEmitter {
 
   Class _viewClient() {
     final mapping = DartTypeMapping(context);
-    final views = context.program.instructions.where(
-      (instruction) =>
-          instruction.returns != null && !_hasWritable(instruction.accounts),
-    );
+    final views = context.program.instructions.where(isViewInstruction);
     return Class(
       (builder) => builder
         ..name = type('view_client')
@@ -86,17 +83,5 @@ return $codec.decodeExact(data);'''),
           }),
         ),
     );
-  }
-
-  bool _hasWritable(List<IdlInstructionAccount> accounts) {
-    for (final account in accounts) {
-      switch (account) {
-        case IdlAccountItem(:final writable):
-          if (writable) return true;
-        case IdlAccountGroup(:final accounts):
-          if (_hasWritable(accounts)) return true;
-      }
-    }
-    return false;
   }
 }

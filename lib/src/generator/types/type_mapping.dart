@@ -75,7 +75,7 @@ final class DartTypeMapping {
       'List.unmodifiable(List.generate($reader.fixedLength(${member(lengthName)}), (index) => $reader.index(index, () => $reader.nested(() => ${read(inner, reader)}))))',
     IdlDefinedType(:final name, :final generics, :final constGenerics) =>
       '$reader.nested(() => ${_codec(name, generics, constGenerics)}.read($reader))',
-    IdlGenericType(:final name) => '${member(name)}Codec.read($reader)',
+    IdlGenericType(:final name) => '${member(type(name))}Codec.read($reader)',
   };
 
   /// Builds Borsh write statements for [value] from [expression].
@@ -135,7 +135,7 @@ final class DartTypeMapping {
     IdlDefinedType(:final name, :final generics, :final constGenerics) =>
       '${_codec(name, generics, constGenerics)}.write($writer, $expression);',
     IdlGenericType(:final name) =>
-      '${member(name)}Codec.write($writer, $expression);',
+      '${member(type(name))}Codec.write($writer, $expression);',
   };
 
   String _codec(
