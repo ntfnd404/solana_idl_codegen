@@ -14,7 +14,10 @@ Add the generator and `build_runner` to `dev_dependencies`:
 ```yaml
 dev_dependencies:
   build_runner: ^2.15.0
-  solana_idl_codegen: ^0.1.0
+  solana_idl_codegen:
+    git:
+      url: https://github.com/ntfnd404/solana_idl_codegen.git
+      ref: v0.2.0
 ```
 
 Put IDL files under `lib/idl/`:

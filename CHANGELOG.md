@@ -1,3 +1,19 @@
+## 0.2.0
+
+- **Breaking:** Changed generated filenames to Dart-style lower snake case,
+  such as `my_program_solana_accounts.dart`; CLI regeneration removes owned
+  legacy dotted filenames.
+- Made generated bundled and modular SDKs analyzer-clean without broad lint
+  suppressions, explicit `dynamic`, or raw collection type checks.
+- Enabled strict casts, inference, and raw-type analysis throughout the
+  generator and generated-output test matrix.
+- Fixed nullable account resolution and account-data PDA seed emission while
+  preserving typed failures and transport-neutral runtime boundaries.
+- Added feature-aware generated imports and private helpers so minimal and
+  real-world IDLs emit only the dependencies they use.
+- Fixed generic codec parameter naming and added analyzer and runtime coverage
+  for concrete generic byte codecs and nested writable account groups.
+
 ## 0.1.0
 
 Initial release.
@@ -19,8 +35,3 @@ Initial release.
   Borsh/runtime, and reference-vector tests.
 - Added publication metadata, documentation, security policy, and release
   checklist.
-- Changed generated filenames to Dart-style lower snake case, such as
-  `my_program_solana_accounts.dart`; CLI regeneration removes owned legacy
-  dotted filenames.
-- Enabled strict casts, inference, and raw-type analysis, and removed raw
-  `Map`/`List` checks from JSON decoding boundaries.

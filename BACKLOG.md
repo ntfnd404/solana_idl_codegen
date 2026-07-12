@@ -1,7 +1,7 @@
 # Backlog
 
 This file tracks deliberate follow-up work that is not required for the
-current publishable `0.1.0` package, but should not be forgotten.
+current release, but should not be forgotten.
 
 ## Remove generated lint suppressions
 
