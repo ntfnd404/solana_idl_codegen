@@ -89,6 +89,25 @@ linter:
       await _runDart(root, ['run', 'main.dart']);
     },
   );
+
+  test('generic codecs execute direct and nested byte round trips', () async {
+    final root = await Directory.systemTemp.createTemp(
+      'solana_idl_generic_codec_runtime_',
+    );
+    addTearDown(() => root.delete(recursive: true));
+    final generated = generator.generateString(
+      _genericBytesViewFixture,
+      options: const GenerationOptions(),
+    );
+    await File(
+      p.join(root.path, 'generated.dart'),
+    ).writeAsString(generated.files['program.dart']!);
+    await File(
+      p.join(root.path, 'main.dart'),
+    ).writeAsString(_genericCodecRuntimeProgram);
+
+    await _runDart(root, ['run', 'main.dart']);
+  });
 }
 
 void _expectFeatureImports(String fixture, GenerationOutput generated) {
@@ -109,6 +128,7 @@ void _expectFeatureImports(String fixture, GenerationOutput generated) {
     case 'writable_bytes_return':
       expect(client, isNot(contains(typedDataImport)));
       expect(client, isNot(contains(typesImport)));
+      expect(client, isNot(contains('Future<Uint8List>')));
   }
 }
 
@@ -370,6 +390,47 @@ Future<void> main() async {
 }
 ''';
 
+const _genericCodecRuntimeProgram = r'''
+import 'dart:typed_data';
+
+import 'generated.dart';
+
+void expectBytes(Uint8List actual, List<int> expected, String label) {
+  if (actual.length != expected.length) {
+    throw StateError('$label length changed.');
+  }
+  for (var index = 0; index < expected.length; index++) {
+    if (actual[index] != expected[index]) {
+      throw StateError('$label byte $index changed.');
+    }
+  }
+}
+
+void main() {
+  final bytesCodec =
+      GenericBytesViewFunctionalBorshCodec<Uint8List>(
+        (reader) => reader.readBytes(reader.collectionLength()),
+        (writer, value) {
+          writer.writeUnsigned(BigInt.from(value.length), 4);
+          writer.writeBytes(value);
+        },
+      );
+  final value = GenericBytesViewWrapper<Uint8List>(
+    value: Uint8List.fromList([1, 2, 3, 255]),
+  );
+
+  final wrapperCodec = GenericBytesViewWrapper.codec(bytesCodec);
+  final decodedWrapper = wrapperCodec.decodeExact(wrapperCodec.encode(value));
+  expectBytes(decodedWrapper.value, const [1, 2, 3, 255], 'wrapper');
+
+  final holder = GenericBytesViewBytesHolder(wrapper: value);
+  final decodedHolder = GenericBytesViewBytesHolder.codec.decodeExact(
+    GenericBytesViewBytesHolder.codec.encode(holder),
+  );
+  expectBytes(decodedHolder.wrapper.value, const [1, 2, 3, 255], 'holder');
+}
+''';
+
 const _minimalFixture = r'''
 {
   "address": "11111111111111111111111111111111",
@@ -461,7 +522,10 @@ const _writableBytesReturnFixture = r'''
   "instructions": [{
     "name": "write_bytes",
     "discriminator": [2, 4, 6, 8, 1, 3, 5, 7],
-    "accounts": [{"name": "state", "writable": true}],
+    "accounts": [{
+      "name": "group",
+      "accounts": [{"name": "state", "writable": true}]
+    }],
     "args": [],
     "returns": "bytes"
   }],
